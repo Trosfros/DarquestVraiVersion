@@ -9,7 +9,7 @@ if (!isset($_SESSION['user'])) {
 $idJoueur = $_SESSION['user']['IdJoueur']; 
 $items_possedes = [];
 
-$sql = "SELECT i.Quantite, it.Nom, it.image
+$sql = "SELECT i.IdItem ,i.Quantite, it.Nom, it.image
         FROM Inventaires i 
         JOIN Items it ON i.IdItem = it.IdItem
         WHERE i.IdJoueur = ?";
@@ -77,7 +77,7 @@ if ($result->num_rows > 0) {
             <?php foreach ($items_possedes as $item): ?>
                 <div class="inventory-item">
                     <div class="item-img" style="height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-                        <img src="img/<?= htmlspecialchars($item['chemin_image'] ?: 'default.png') ?>" alt="" style="max-height: 100%;">
+                        <img src="img/<?= htmlspecialchars($item['image'] ?: 'default.png') ?>" alt="" style="max-height: 100%;">
                     </div>
                     <h3 style="margin: 5px 0;"><?= htmlspecialchars($item['Nom']) ?></h3>
                     <p style="color: #d4af37; font-weight: bold;">Quantité : <?= $item['Quantite'] ?></p>
@@ -106,7 +106,21 @@ if ($result->num_rows > 0) {
 
     function openModal(id,nom) {
         itemToSell = nom;
-        $_Session["SoldItem"] = id;
+        
+        post('vendre.php', {value:id})
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                //we need some cool ass sell confirmation here 
+                
+            }else {
+                alert("Erreur : " + data.message);
+                location.reload();
+            }
+        })
+        .catch(error => {
+                console.error('Erreur:',error );
+        });
         document.getElementById('itemNameModal').innerText = nom;
         document.getElementById('confirmModal').style.display = 'flex';
     }

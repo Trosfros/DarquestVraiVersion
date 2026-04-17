@@ -3,11 +3,11 @@ require_once 'config.php';
 header('Content-Type: application/json');
 
 $idJoueur = $_SESSION['user']['IdJoueur'];
-$soldItem = $_SESSION["SoldItem"];
+$soldItem = $_POST['value'];
 $qty = 1; //change this for later pls 
 try 
 {
-    if (empty($_Session["SoldItem"]))
+    if (empty($_Session["SoldItem"]) || empty($soldItem))
         throw new InvalidArgumentException("No item in sale ");
     $soldItem = $_Session["SoldItem"];
     $connexion->begin_transaction();
@@ -16,7 +16,7 @@ try
     $stmt->bind_param("ii",$soldItem, $qty);
     $stmt->execute();
     $stmt->close();
-    echo json_encode(['success' => false]);
+    echo json_encode(['success' => true]);
 }catch(Exception $e) {
     $connexion->rollback();
      echo json_encode(['success' => false, 'message' => $e->getMessage()]);
