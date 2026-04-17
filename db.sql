@@ -238,6 +238,114 @@ BEGIN
 END
 //
 
+CREATE PROCEDURE BuyItem(
+  IdJoueur INT,
+  Iditem INT,
+  quantite INT
+  )
+
+BEGIN
+DECLARE ItemPrice INT;
+DECLARE PlayerMoney INT;
+Declare TotalPrice INT;
+DECLARE itemQuantity INT;
+DECLARE SellerId INT; 
+DECLARE InvAmount INT;
+DECLARE MageCheck INT; 
+Declare Itemtype VARCHAR(20);
+
+SELECT Prix, Type INTO ItemPrice, Itemtype
+ FROM Items
+ WHERE Iditem = Items.IdItem;
+Select count(*) into MageCheck 
+from EssaieEnigmes EE
+inner join Enigme E on E.IdEnigme = EE.IdEnigme
+inner join CategorieEnigme CE on CE.IdCategorie = E.IdCategorie
+where CE.EstMagie = 1;
+SELECT Quantite, m.IdJoueur INTO itemQuantity, SellerId
+FROM Marche m 
+WHERE m.IdItem = Iditem 
+LIMIT 1;
+SELECT PieceBronze INTO PlayerMoney
+FROM Joueurs
+WHERE IdJoueur = Joueurs.IdJoueur;
+IF MageCheck >= 5 && Itemtype = "S" THEN 
+   SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "cannot buy spells if you aren't a wizard";
+END IF; 
+ IF Itemprice IS NOT NULL AND itemQuantity>=quantite THEN 
+  Set TotalPrice = ItemPrice * quantite;
+    IF PlayerMoney >= TotalPrice THEN 
+      
+     UPDATE Joueurs SET  Joueurs.PieceOr  = Joueurs.PieceOr - TotalPrice 
+     WHERE IdJoueur = Joueurs.IdJoueur;
+     UPDATE Joueurs 
+     SET Joueurs.PieceOr = Joueurs.PieceOr + TotalPrice
+     WHERE Joueurs.IdJoueur = SellerId;
+
+      UPDATE Marche SET Marche.Quantite = Marche.Quantite - quantite
+      WHERE Iditem = Marche.IdItem;
+      SELECT count(*) INTO InvAmount 
+      from Inventaires Inv
+      where Inv.IdJoueur = IdJoueur AND Inv.IdItem = Iditem;
+      Delete from Marche
+      where Marche.Quantite = 0;
+      if InvAmount = 0 THEN 
+     
+        insert 
+        into Inventaires (IdJoueur,IdItem,Quantite)
+        VALUES (IdJoueur, Iditem, quantite);
+      ELSE 
+        UPDATE  Inventaires 
+        SET Quantite = Quantite + quantite
+        WHERE Inventaires.IdJoueur = IdJoueur AND Inventaires.IdItem = Iditem;
+      END IF; 
+    ELSE 
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Insufficient funds';
+    END IF; 
+ ELSE 
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Item not found';
+END IF;
+END
+//
+CREATE PROCEDURE SellItem
+(
+IdJoueur INT,
+IdItem INT,
+Quantite INT
+)
+BEGIN 
+ DECLARE InventoryQt INT;
+  Declare MarketItemCount INT;
+  
+ SELECT Quantite INTO InventoryQt
+  FROM Inventaire as inv
+  WHERE inv.IdJoueur = IdJoueur AND inv.IdItems = IdItem;
+
+  IF InventoryQt >= Quantite THEN 
+    UPDATE Inventaire as inv
+    SET Quantite = inv.Quantite- Quantite
+    WHERE IdJoueur = IdJoueur AND IdItems = IdItem;
+    SELECT COUNT(*) INTO MarketItemCount
+    FROM Marcher m
+    WHERE m.IdItems = IdItem AND IdJoueur = m.IdJoueur;
+    Delete 
+    from Inventaire as inv 
+    WHERE inv.Quantite = 0;
+    if MarketItemCount=0 THEN
+      INSERT INTO Marcher (IdJoueur,IdItems,Quantité)
+       VALUES (IdJoueur,IdItem,Quantite);
+    ELSE 
+      UPDATE Marcher m
+      set Quantité = Quantité + Quantite
+      WHERE m.IdItems = IdItem AND IdJoueur = m.IdJoueur;
+    END IF;
+    
+  ELSE 
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Not enough items in inventory';
+  END IF;
+END;
+//
+
 delimiter ;
 
 INSERT INTO CategorieEnigme (Categorie, EstMagie) VALUES ('Culture Générale', 0);
@@ -266,3 +374,9 @@ INSERT INTO Marche (IdJoueur, IdItem, Quantite) VALUES
   (3, 3, 10),
   (4, 4, 13),
   (5, 5, 3);
+
+
+CALL BuyItem(3,4,3);
+SELECT * from Joueurs;
+SELECT * from Inventaires;
+SELECT * FROM Marche;

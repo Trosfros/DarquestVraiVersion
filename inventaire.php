@@ -82,7 +82,7 @@ if ($result->num_rows > 0) {
                     <h3 style="margin: 5px 0;"><?= htmlspecialchars($item['Nom']) ?></h3>
                     <p style="color: #d4af37; font-weight: bold;">Quantité : <?= $item['Quantite'] ?></p>
                     
-                    <button class="btn btn-sell" onclick="openModal('<?= addslashes(htmlspecialchars($item['Nom'])) ?>')">Vendre</button>
+                    <button class="btn btn-sell" onclick="openModal('<?= addslashes(htmlspecialchars($item['IdItem'])),$item['Nom'] ?>')">Vendre</button>
                     <button class="btn btn-use">Utiliser</button>
                 </div>
             <?php endforeach; ?>
@@ -104,8 +104,9 @@ if ($result->num_rows > 0) {
 <script>
     let itemToSell = "";
 
-    function openModal(nom) {
+    function openModal(id,nom) {
         itemToSell = nom;
+        $_Session["SoldItem"] = id;
         document.getElementById('itemNameModal').innerText = nom;
         document.getElementById('confirmModal').style.display = 'flex';
     }
@@ -117,6 +118,7 @@ if ($result->num_rows > 0) {
     function processSale() {
        
         console.log("Vente de : " + itemToSell);
+         $_Session["SoldItem"] = "";
         closeModal();
       
     }
