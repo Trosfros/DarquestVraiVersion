@@ -1,10 +1,9 @@
 <?php
-session_start();
-require 'config.php';
+require_once 'config.php';
 
 $id_produit = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-$sql = "SELECT IdItems, Nom, Description, Prix, QuantiteStock, Type, chemin_image FROM Items WHERE IdItems = ?";
+$sql = "SELECT IdItem, Nom, Description, Prix, QuantiteStock, Type, image FROM Items WHERE IdItem = ?";
 $stmt = $connexion->prepare($sql);
 $stmt->bind_param("i", $id_produit);
 $stmt->execute();

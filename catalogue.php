@@ -1,41 +1,16 @@
 <?php
-require 'config.php';
+require_once 'config.php';
 
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-$tri = isset($_GET['tri']) ? $_GET['tri'] : 'nom';
+$tri = isset($_GET['tri']) ? $_GET['tri'] : '';
 
-$sql = "SELECT IdItems, Nom, Description, Prix, QuantiteStock, Type, chemin_image FROM Items";
-$params = [];
-$types = "";
+if (!in_array($tri, ['P']))
+    $tri = '';
 
-// Si une recherche est effectuée
-if (!empty($search)) {
-    $sql .= " WHERE Nom LIKE ? OR Description LIKE ? OR Type LIKE ?";
-    $searchTerm = "%" . $search . "%";
-    $params = [$searchTerm, $searchTerm, $searchTerm];
-    $types = "sss";
-}
-
-
-switch ($tri) {
-    case 'prix_desc':
-        $sql .= " ORDER BY Prix DESC";
-        break;
-    case 'prix_asc':
-        $sql .= " ORDER BY Prix ASC";
-        break;
-    default:
-        $sql .= " ORDER BY Nom ASC";
-        break;
-}
-
-$stmt = $connexion->prepare($sql);
-if (!empty($search)) {
-    $stmt->bind_param($types, ...$params);
-}
+$stmt = $connexion->prepare("CALL GetMarketItems(12, ?, '$tri')");
+$stmt->bind_param('s', $search);
 $stmt->execute();
-$result = $stmt->get_result();
-$items = $result->fetch_all(MYSQLI_ASSOC);
+$items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -223,9 +198,9 @@ $items = $result->fetch_all(MYSQLI_ASSOC);
 
             <label for="tri">Trier par : </label>
             <select name="tri" id="tri" onchange="this.form.submit()">
-                <option value="nom" <?= $tri == 'nom' ? 'selected' : '' ?>>Nom (A-Z)</option>
-                <option value="prix_asc" <?= $tri == 'prix_asc' ? 'selected' : '' ?>>Prix croissant</option>
-                <option value="prix_desc" <?= $tri == 'prix_desc' ? 'selected' : '' ?>>Prix décroissant</option>
+                <option value="" <?= $tri == '' ? 'selected' : '' ?>>Nom (A-Z)</option>
+                <option value="P" <?= $tri == 'P' ? 'selected' : '' ?>>Prix croissant</option>
+                <option value="P" <?= $tri == 'P' ? 'selected' : '' ?>>Prix décroissant</option>
             </select>
         </form>
     </div>
@@ -233,18 +208,18 @@ $items = $result->fetch_all(MYSQLI_ASSOC);
     <div class="items-grid">
         <?php if (count($items) > 0): ?>
             <?php foreach ($items as $item): ?>
-                <a href="produit.php?id=<?= $item['IdItems'] ?>" class="item-card">
+                <a href="produit.php?id=<?= $item['IdItem'] ?>" class="item-card">
                     <div class="item-img">
-                        <?php if (!empty($item['chemin_image'])): ?>
-                            <img src="img/<?= htmlspecialchars($item['chemin_image']) ?>" alt="<?= htmlspecialchars($item['Nom']) ?>">
+                        <?php if (!empty($item['image'])): ?>
+                            <img src="img/<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['Nom']) ?>">
                         <?php else: ?>
                             <div style="color: #ccc;">🖼️ Aucun visuel</div>
                         <?php endif; ?>
                     </div>
 
                     <div class="badges">
-                        <span class="category-badge">🏷️ <?= htmlspecialchars($item['Type']) ?></span>
-                        <span class="stock-badge">📦 <?= $item['QuantiteStock'] ?></span>
+                        <span class="category-badge">🏷️ <?= htmlspecialchars($item['NomType']) ?></span>
+                        <span class="stock-badge">📦 <?= $item['Quantite'] ?></span>
                     </div>
 
                     <h3 class="item-name"><?= htmlspecialchars($item['Nom']) ?></h3>

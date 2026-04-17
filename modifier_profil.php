@@ -1,12 +1,12 @@
 <?php
-require 'config.php';
+require_once 'config.php';
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit();
 }
 
-$idJoueur = $_SESSION['user_id'];
+$idJoueur = $_SESSION['user']['IdJoueur'];
 $message = "";
 $error = "";
 

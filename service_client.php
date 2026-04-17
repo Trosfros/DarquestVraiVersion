@@ -1,5 +1,5 @@
 <?php
-require 'config.php';
+require_once 'config.php';
 
 // Calcul du total des items dans le panier
 $totalItems = 0;

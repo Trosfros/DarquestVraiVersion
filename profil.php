@@ -1,12 +1,12 @@
 <?php
-require 'config.php';
+require_once 'config.php';
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit();
 }
 
-$idJoueur = $_SESSION['user_id'];
+$idJoueur = $_SESSION['user']['IdJoueur'];
 
 $stmt = $connexion->prepare("SELECT * FROM joueurs WHERE IdJoueur = ?");
 $stmt->bind_param("i", $idJoueur);
@@ -39,12 +39,7 @@ $totalSucces = $f_succes + $m_succes + $d_succes;
 $totalTentatives = $f_total + $m_total + $d_total;
 $tauxReussite = ($totalTentatives > 0) ? round(($totalSucces / $totalTentatives) * 100) : 0;
 
-// Mise à jour session pour le header
-$_SESSION['pv'] = $pv;
-$_SESSION['piece_or'] = $or;
-$_SESSION['piece_argent'] = $argent;
-$_SESSION['piece_bronze'] = $bronze;
-$_SESSION['alias'] = $alias;
+UpdateUserSessionInfo();
 
 $pvPercent = min(100, max(0, ($pv / 100) * 100));
 ?>

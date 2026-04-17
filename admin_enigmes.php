@@ -1,7 +1,6 @@
 <?php
-session_start();
 require 'check_admin.php'; 
-require 'config.php';
+require_once 'config.php';
 
 $message = "";
 

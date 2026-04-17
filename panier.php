@@ -1,6 +1,5 @@
 <?php
-session_start();
-require 'config.php';
+require_once 'config.php';
 
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
@@ -13,7 +12,7 @@ $hasStockError = false;
 
 if (!empty($_SESSION['cart'])) {
     foreach ($_SESSION['cart'] as $itemId => $itemQty) {
-        $sql = "SELECT IdItems, Nom, QuantiteStock, Prix, chemin_image FROM Items WHERE IdItems = ?";
+        $sql = "SELECT IdItems, Nom, QuantiteStock, Prix, image FROM Items WHERE IdItems = ?";
         $stmt = $connexion->prepare($sql);
         $stmt->bind_param("i", $itemId);
         $stmt->execute();
@@ -26,13 +25,13 @@ if (!empty($_SESSION['cart'])) {
             if ($insufficient) $hasStockError = true;
 
             $items[] = [
-                'id' => $row['IdItems'],
+                'id' => $row['IdItem'],
                 'name' => $row['Nom'],
                 'price' => $row['Prix'],
                 'qty' => $itemQty,
                 'stock' => $stockDisponible,
                 'insufficient' => $insufficient,
-                'image' => $row['chemin_image']
+                'image' => $row['image']
             ];
             $totalItems += $itemQty;
             $total += ($row['Prix'] * $itemQty);
@@ -201,7 +200,7 @@ if (!empty($_SESSION['cart'])) {
                         <span style="color: #d4af37;"><?= $total ?> 🟡</span>
                     </div>
                     
-                    <?php if(!isset($_SESSION['alias'])): ?>
+                    <?php if(!isset($_SESSION['user'])): ?>
                         <a href="register.php" class="btn-order" style="text-decoration:none; display:block; text-align:center;">Se connecter</a>
                     <?php else: ?>
                         <button id="btn-valider-commande" 

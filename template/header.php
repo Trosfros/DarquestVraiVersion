@@ -1,36 +1,3 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Si l'utilisateur est connecté, on s'assure que les données sont à jour
-if (isset($_SESSION['user_id'])) {
-    try {
-        $db_header = new PDO('mysql:host=localhost;dbname=mydb;charset=utf8', 'root', '');
-        // On ajoute EstAdmin à la sélection
-        $stmtH = $db_header->prepare("SELECT PieceOr, PieceArgent, PieceBronze, PV, EstMage, EstAdmin FROM joueurs WHERE IdJoueur = ?");
-        $stmtH->execute([$_SESSION['user_id']]);
-        $user = $stmtH->fetch(PDO::FETCH_ASSOC);
-
-        if ($user) {
-            $_SESSION['piece_or'] = $user['PieceOr'];
-            $_SESSION['piece_argent'] = $user['PieceArgent'];
-            $_SESSION['piece_bronze'] = $user['PieceBronze'];
-            $_SESSION['pv'] = $user['PV'];
-            $_SESSION['EstMage'] = $user['EstMage'];
-            $_SESSION['EstAdmin'] = $user['EstAdmin']; // On stocke le statut admin ici
-        }
-    } catch (Exception $e) { }
-
-} else {
-    // Valeurs par défaut uniquement pour les visiteurs non connectés
-    if (!isset($_SESSION['pv'])) $_SESSION['pv'] = 0;
-    if (!isset($_SESSION['piece_or'])) $_SESSION['piece_or'] = 0;
-    if (!isset($_SESSION['piece_argent'])) $_SESSION['piece_argent'] = 0;
-    if (!isset($_SESSION['piece_bronze'])) $_SESSION['piece_bronze'] = 0;
-}
-?>
-
 <style>
     /* --- CONFIGURATION GLOBALE --- */
     .top-nav, .sub-nav {
@@ -218,25 +185,28 @@ if (isset($_SESSION['user_id'])) {
         </form>
         
         <div class="user-menu">
-            <?php if (isset($_SESSION['alias'])): ?>
+                <?php
+                $user = @ $_SESSION['user'];
+                if (isset($user)):
+                ?>
                 <div class="player-stats">
                     <div class="hp-container" title="Points de Vie">
-                        <div class="hp-bar" style="width: <?= $_SESSION['pv'] ?>%;"></div>
-                        <span class="hp-text"><?= $_SESSION['pv'] ?> HP</span>
+                        <div class="hp-bar" style="width: <?= $_SESSION['user']['PV'] ?>%;"></div>
+                        <span class="hp-text"><?= $user['PV'] ?> HP</span>
                     </div>
 
                     <div class="rpg-currency-bar">
                         <div class="coin-item" title="Or">
                             <img src="./img/gold.png" alt="Or">
-                            <span><?= $_SESSION['piece_or'] ?></span>
+                            <span><?= $user['PieceOr'] ?></span>
                         </div>
                         <div class="coin-item" title="Argent">
                             <img src="./img/silver.png" alt="Argent">
-                            <span><?= $_SESSION['piece_argent'] ?></span>
+                            <span><?= $user['PieceArgent'] ?></span>
                         </div>
                         <div class="coin-item" title="Bronze">
                             <img src="./img/bronze.png" alt="Bronze">
-                            <span><?= $_SESSION['piece_bronze'] ?></span>
+                            <span><?= $user['PieceBronze'] ?></span>
                         </div>
                     </div>
                 </div>
@@ -245,14 +215,14 @@ if (isset($_SESSION['user_id'])) {
 
                 <div class="dropdown">
                     <strong style="cursor:pointer; color: white;" onclick="toggleHeaderMenu(event, 'userDrop')">
-                        👤 <?= htmlspecialchars($_SESSION['alias']) ?> ▾
+                        👤 <?= htmlspecialchars($user['Alias']) ?> ▾
                     </strong>
                     <div id="userDrop" class="dropdown-content">
                     <a href="profil.php">👤 Mon Profil</a>
     
-                    <?php if (isset($_SESSION['EstAdmin']) && $_SESSION['EstAdmin'] == 1): ?>
-                    <a href="admin_enigmes.php" style="color: #d4af37 !important; border-top: 1px solid #333;">🛡️ Admin Panel</a>
-                 <?php endif; ?>
+                    <?php if ($user['EstAdmin']): ?>
+                        <a href="admin_enigmes.php" style="color: #d4af37 !important; border-top: 1px solid #333;">🛡️ Admin Panel</a>
+                    <?php endif; ?>
     
               <a href="logout.php">🚪 Déconnexion</a>
                 </div>

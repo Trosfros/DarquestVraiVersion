@@ -1,18 +1,17 @@
 <?php
-session_start();
-require 'config.php';
+require_once 'config.php';
 
-if (!isset($_SESSION['alias'])) {
+if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
 }
 
-$idJoueur = $_SESSION['user_id']; 
+$idJoueur = $_SESSION['user']['IdJoueur']; 
 $items_possedes = [];
 
-$sql = "SELECT i.Quantite, it.Nom, it.chemin_image 
-        FROM inventaire i 
-        JOIN Items it ON i.IdItems = it.IdItems 
+$sql = "SELECT i.Quantite, it.Nom, it.image
+        FROM Inventaires i 
+        JOIN Items it ON i.IdItem = it.IdItem
         WHERE i.IdJoueur = ?";
 
 $stmt = $connexion->prepare($sql);

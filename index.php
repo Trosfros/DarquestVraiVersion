@@ -1,16 +1,10 @@
 <?php
-session_start();
-require 'config.php';
+require_once 'config.php';
 
-$sql = "SELECT IdItems, Nom, Type, Prix, QuantiteStock, chemin_image FROM Items ORDER BY IdItems DESC LIMIT 12";
-$result = $connexion->query($sql);
-$items = [];
-if ($result && $result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        $items[] = $row;
-    }
-}
+$result = $connexion->query("CALL GetMarketItems(12, '', '')");
+$items = $result->fetch_all(MYSQLI_ASSOC);
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -219,15 +213,15 @@ if ($result && $result->num_rows > 0) {
     <section class="product-grid">
         <?php if (!empty($items)): ?>
             <?php foreach ($items as $index => $item): ?>
-                <?php $isOutOfStock = ($item['QuantiteStock'] <= 0); ?>
+                <?php $isOutOfStock = ($item['Quantite'] <= 0); ?>
                 
                 <div class="product-card" style="animation-delay: <?= $index * 0.05 ?>s">
-                    <a href="produit.php?id=<?= $item['IdItems'] ?>" style="text-decoration: none; color: inherit;">
-                        <span class="product-type"><?= htmlspecialchars($item['Type']) ?></span>
+                    <a href="produit.php?id=<?= $item['IdItem'] ?>" style="text-decoration: none; color: inherit;">
+                        <span class="product-type"><?= htmlspecialchars($item['NomType']) ?></span>
                         
                         <div class="img-box" style="<?= $isOutOfStock ? 'filter: grayscale(1); opacity: 0.5;' : '' ?>">
-                            <?php if (!empty($item['chemin_image'])): ?>
-                                <img src="img/<?= htmlspecialchars($item['chemin_image']) ?>" alt="<?= htmlspecialchars($item['Nom']) ?>">
+                            <?php if (!empty($item['image'])): ?>
+                                <img src="img/<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['Nom']) ?>">
                             <?php else: ?>
                                 <i class="fa-regular fa-image" style="font-size: 3rem; color: #eee;"></i>
                             <?php endif; ?>
@@ -243,7 +237,7 @@ if ($result && $result->num_rows > 0) {
                             <i class="fa-solid fa-ban"></i> Indisponible
                         </button>
                     <?php else: ?>
-                        <button class="add-btn" onclick="addToCart(<?= $item['IdItems'] ?>)">
+                        <button class="add-btn" onclick="addToCart(<?= $item['IdItem'] ?>)">
                             <i class="fa-solid fa-plus"></i> Ajouter au panier
                         </button>
                     <?php endif; ?>

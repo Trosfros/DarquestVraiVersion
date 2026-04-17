@@ -1,5 +1,5 @@
 DROP DATABASE mydb;
-CREATE DATABASE mydb DEFAULT CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci;
+CREATE DATABASE mydb;
 USE mydb;
 
 CREATE TABLE Joueurs (
@@ -7,10 +7,12 @@ CREATE TABLE Joueurs (
   Alias VARCHAR(45) UNIQUE NOT NULL,
   Nom VARCHAR(45) NOT NULL,
   Prenom VARCHAR(45) NOT NULL,
-  PieceBronze INT NOT NULL DEFAULT 11100,
-  EstAdmin TINYINT(1) NOT NULL,
   MDP VARBINARY(128) NOT NULL,
-  NbDemandeArgent INT NOT NULL,
+  PieceBronze INT NOT NULL DEFAULT 100,
+  PieceArgent INT NOT NULL DEFAULT 100,
+  PieceOr INT NOT NULL DEFAULT 100,
+  EstAdmin TINYINT(1) NOT NULL DEFAULT 0,
+  NbDemandeArgent INT NOT NULL DEFAULT 0,
   PV INT NOT NULL DEFAULT 100,
   Streak INT NOT NULL DEFAULT 0,
   PRIMARY KEY (IdJoueur)
@@ -71,15 +73,15 @@ CREATE TABLE Sorts (
     REFERENCES Items (IdItem)
 );
 
-CREATE TABLE Inventaire (
+CREATE TABLE Inventaires (
   IdJoueur INT NOT NULL,
   IdItem INT NOT NULL,
   Quantite INT NOT NULL,
   PRIMARY KEY (IdJoueur, IdItem),
-  CONSTRAINT fk_IdItem_Inventaire
+  CONSTRAINT fk_IdItem_Inventaires
     FOREIGN KEY (IdItem)
     REFERENCES Items (IdItem),
-  CONSTRAINT fk_IdJoueur_Inventaire
+  CONSTRAINT fk_IdJoueur_Inventaires
     FOREIGN KEY (IdJoueur)
     REFERENCES Joueurs (IdJoueur)
 );
@@ -139,11 +141,11 @@ CREATE TABLE EssaieEnigmes (
   IdEnigme INT NOT NULL,
   Reussi TINYINT(1) NOT NULL,
   PRIMARY KEY (IdJoueur, IdEnigme),
-  INDEX Fk_IdEnigme_idx (IdEnigme ASC) VISIBLE,
+  INDEX fk_IdEnigme_idx (IdEnigme ASC) VISIBLE,
   CONSTRAINT fk_IdEnigme_EssaieEnigmes
     FOREIGN KEY (IdEnigme)
     REFERENCES Enigme (IdEnigme),
-  CONSTRAINT FK_IdJoueur_EssaieEnigmes
+  CONSTRAINT fk_IdJoueur_EssaieEnigmes
     FOREIGN KEY (IdJoueur)
     REFERENCES Joueurs (IdJoueur)
 );
@@ -154,12 +156,12 @@ CREATE TABLE Ticket (
   IdJoueur INT NOT NULL,
   EstDemandeArgent TINYINT(1) NOT NULL,
   PRIMARY KEY (IdTicket),
-  CONSTRAINT FK_Ticket_Joueur
+  CONSTRAINT fk_Ticket_Joueur
     FOREIGN KEY (IdJoueur)
     REFERENCES Joueurs (IdJoueur)
 );
 
-CREATE TABLE Achat (
+CREATE TABLE Achats (
   IdJoueur INT NOT NULL,
   IdItem INT NOT NULL,
   PRIMARY KEY (IdJoueur, IdItem),
@@ -187,37 +189,28 @@ BEGIN
 END;
 //
 
-CREATE Function  CheckLoginCredentials
-(AliasIdentity VARCHAR(100),
-  PASS VARCHAR(255)
-  )
-RETURNS INT
-DETERMINISTIC
-BEGIN 
-  DECLARE hashedPass VARBINARY(128);
-  DECLARE returnval TINYINT(1);
-
-  set hashedPass = SHA2(PASS, 512);
-
-  SELECT count(*) INTO returnval FROM Joueurs 
-  WHERE
-  hashedPass = MDP AND 
-  Alias = AliasIdentity;
-return returnval;
-END
-//
-
-CREATE PROCEDURE GetMarketplaceItems(IN p_limit INT, IN search VARCHAR(100))
+CREATE PROCEDURE GetMarketItems(IN p_limit INT, IN search VARCHAR(100), IN sort CHAR(1))
 BEGIN
     DECLARE fuzz VARCHAR(100);
     SET fuzz = CONCAT('%', search, '%');
 
-    SELECT i.IdItems, i.Nom, i.Type, SUM(m.Quantité) AS Quantite, i.Prix, i.Description, i.image
-    FROM Items i
-    INNER JOIN Marcher m ON m.IdItems = i.IdItems
-    WHERE Nom LIKE fuzz OR Description LIKE fuzz OR GetItemTypeName(i) LIKE fuzz
-    GROUP BY i.IdItems, i.Nom, i.Type, i.Prix, i.Description, i.image
-    LIMIT p_limit;
+    SET @sql = CONCAT(
+      'SELECT i.IdItem, i.Nom, GetItemTypeName(i.Type) as NomType, SUM(m.Quantite) AS Quantite, i.Prix, i.Description, i.image ',
+      'FROM Items i ',
+      'INNER JOIN Marche m ON m.IdItem = i.IdItem ',
+      'WHERE Nom LIKE ? OR Description LIKE ? OR GetItemTypeName(i.Type) LIKE ? ',
+      'GROUP BY i.IdItem, i.Nom, i.Type, i.Prix, i.Description, i.image ',
+      'ORDER BY ',
+      CASE sort
+        WHEN 'P' THEN 'i.Prix '
+        ELSE 'i.Nom '
+      END,
+      'LIMIT ? '
+    );
+
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt USING p_limit, fuzz;
+    DEALLOCATE PREPARE stmt;
 END
 //
 
@@ -228,35 +221,38 @@ BEGIN
   Declare returnval TINYINT(1) DEFAULT 0;
   SELECT EXISTS (
     select 1 from 
-    Marcher as ma 
+    Marche as ma 
     where ma.IdItem = v_IdItem
   ) INTO returnval;
   return returnval;
 END
 //
 
-CREATE PROCEDURE CreateAccount(
-  Alias VARCHAR(45) ,
-  Nom VARCHAR(45),
-  Prenom VARCHAR(45),
-  PASS VARCHAR(45),
-  EstAdmin TINYINT(1)
-)
-BEGIN
-  DECLARE ENCRYPTEDPASS VARBINARY(128);
-  DECLARE ExistantAliasQuant INT;
-  SELECT COUNT(*) INTO ExistantAliasQuant
-  FROM Joueurs J
-  WHERE J.Alias = Alias;
-  if Alias IS NULL OR NOM IS NULL OR Prenom IS NULL OR PASS IS NULL OR EstAdmin IS NULL OR ExistantAliasQuant > 0 THEN 
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = ' invalid account creation';
-  ELSE 
-    SET ENCRYPTEDPASS = SHA2(PASS,512);
-    INSERT INTO
-    Joueurs (Alias,Nom,Prenom,PieceBronze,EstAdmin,MDP,NbDemandeArgent)
-    VALUES (Alias,Nom,Prenom,11100,EstAdmin,ENCRYPTEDPASS,0);
-  END IF ;
-END
-//
-
 delimiter ;
+
+INSERT INTO CategorieEnigme (Categorie, EstMagie) VALUES ('Culture Générale', 0);
+
+INSERT INTO Enigme (IdCategorie, Difficulte, Question, Reponse1, Reponse2, Reponse3, Reponse4, BonneReponse) VALUES
+  (LAST_INSERT_ID(), 1, 'Quelle est la capitale de la France ?', 'Lyon', 'Paris', 'Marseille', 'Bordeaux', 2);
+
+INSERT INTO Items (Nom, Type, Prix, Description, image) VALUES
+  ('Épée Magique', 'A', 300, 'Une épee magique', 'epee.png'),
+  ('Armure En Fer', 'R', 150, 'Une grosse armure capable de vous protéger contre les attaques!', 'amure1.png'),
+  ('Potion Magique de Soin', 'P', 34, 'Une potion de soin très utiles en combat!', 'soin1.png'),
+  ('Potion Magique De Glace', 'P', 26, 'Gèle les ennemies de toute tailles!', 'potion2.png'),
+  ('Potion Magique De Feu', 'P', 39, 'Attention sa brule!', 'potion3.png');
+
+INSERT INTO Joueurs (Alias, Nom, Prenom, MDP) VALUES
+  ('fdwefewf', 'bonjour', 'salut', 0x2432792431302461764f446c396e38444c4a3444776d457864546245654a6e746c543043366b47753965724a5a2f444462795857314e652e5043414b),
+  ('Trosfros', 'Guichard', 'Maxime', 0x243279243130246a6a667838374f3069666748465251715932685a4f65724f55754b6c6f43644c4f506f38645079317576506a34714b633277304943),
+  ('Frou_Frou', 'Perron', 'Gabriel', 0x243279243130246b446647385a32445654434f6c5054616959416331652e6e4d555a7a526376684a616641795837504f58724b51454b63624e4c394f),
+  ('Lebon', 'Lebon', 'Pascal', 0x24327924313024416d6d4968546832456f47736469437575754e72397569474f6f444f6866444c417259365a4e6b424a334d674f7a6a305a725a6453),
+  ('Orisa', 'Orisa', 'Orisa', 0x243279243130244536595a6b454a735873636a566a2e4b5649322e794f6b506955386c4b756e51524c4649326a554a622e5168575062564c7371766d),
+  ('tamere', 'tamere', 'tamere', 0x243279243130242e4d6c30486b4533617a52746c4d6a6d45572f304b4f397a4439502e366a687956436545597041385a4c732e4c47496c7546526447);
+
+INSERT INTO Marche (IdJoueur, IdItem, Quantite) VALUES
+  (1, 1, 15),
+  (2, 2, 5),
+  (3, 3, 10),
+  (4, 4, 13),
+  (5, 5, 3);

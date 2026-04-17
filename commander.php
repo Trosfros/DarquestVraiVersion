@@ -1,23 +1,21 @@
 <?php
-session_start();
-require 'config.php'; 
+require_once 'config.php'; 
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id']) || empty($_SESSION['cart'])) {
+if (!isset($_SESSION['user']) || empty($_SESSION['cart'])) {
     echo json_encode(['success' => false, 'message' => 'Session invalide ou panier vide']);
     exit;
 }
 
-$idJoueur = $_SESSION['user_id'];
+$idJoueur = $_SESSION['user']['IdJoueur'];
 
 try {
     $connexion->begin_transaction();
 
     foreach ($_SESSION['cart'] as $itemId => $qty) {
-        
         $sqlStock = "UPDATE Items SET QuantiteStock = QuantiteStock - ? 
-                     WHERE IdItems = ? AND QuantiteStock >= ?";
+                     WHERE IdItem = ? AND QuantiteStock >= ?";
         $stmtStock = $connexion->prepare($sqlStock);
         
         if (!$stmtStock) {
@@ -33,7 +31,7 @@ try {
         }
 
       
-        $sqlInv = "INSERT INTO inventaire (IdJoueur, IdItems, Quantite) 
+        $sqlInv = "INSERT INTO inventaire (IdJoueur, IdItem, Quantite) 
                    VALUES (?, ?, ?) 
                    ON DUPLICATE KEY UPDATE Quantite = Quantite + ?";
         

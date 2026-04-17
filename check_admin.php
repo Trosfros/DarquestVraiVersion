@@ -1,9 +1,5 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
+if (!isset($_SESSION['user']) || $_SESSION['user']['EstAdmin'] != 1) {
     header("Location: index.php?error=forbidden");
     exit();
 }

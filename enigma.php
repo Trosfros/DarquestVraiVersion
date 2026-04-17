@@ -1,7 +1,8 @@
 <?php
-require 'config.php';
+require_once 'config.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user = @ $_SESSION['user'];
+if (!isset($user)) {
     header('Location: login.php?message=restricted'); 
     exit();
 }
@@ -11,26 +12,9 @@ $stmtUser = $connexion->prepare("SELECT QuetesMagieReussies, EstMage,
     NbQuetesMoyenSuccess, NbQuetesMoyenTotal, 
     NbQuetesDifficileSuccess, NbQuetesDifficileTotal, 
     PV FROM Joueurs WHERE IdJoueur = ?");
-$stmtUser->bind_param("i", $_SESSION['user_id']);
+$stmtUser->bind_param("i", $user['IdJoueur']);
 $stmtUser->execute();
 $userStats = $stmtUser->get_result()->fetch_assoc();
-
-if ($userStats) {
-    $_SESSION['quetes_magie'] = $userStats['QuetesMagieReussies'];
-    $_SESSION['EstMage'] = $userStats['EstMage'];
-    
-    // Succès
-    $_SESSION['NbQuetesFacileSuccess'] = $userStats['NbQuetesFacileSuccess'];
-    $_SESSION['NbQuetesMoyenSuccess'] = $userStats['NbQuetesMoyenSuccess'];
-    $_SESSION['NbQuetesDifficileSuccess'] = $userStats['NbQuetesDifficileSuccess'];
-    
-  
-    $_SESSION['NbQuetesFacileTotal'] = $userStats['NbQuetesFacileTotal'];
-    $_SESSION['NbQuetesMoyenTotal'] = $userStats['NbQuetesMoyenTotal'];
-    $_SESSION['NbQuetesDifficileTotal'] = $userStats['NbQuetesDifficileTotal'];
-    
-    $_SESSION['pv'] = $userStats['PV'];
-}
 
 $is_playing = false;
 $enigme = null;
@@ -55,7 +39,7 @@ if ($is_playing && !$enigme) {
     $enigme = ['IdEnigme' => 0, 'Difficulte' => 1, 'Question' => 'Aucune énigme.', 'Reponse1' => 'Vide', 'Reponse2' => 'Vide', 'Reponse3' => 'Vide', 'Reponse4' => 'Vide', 'NomCat' => 'Aucune'];
 }
 
-$estMage = (isset($_SESSION['EstMage']) && $_SESSION['EstMage'] == 1);
+$estMage = ($userStats['EstMage'] == 1);
 $classeNom = $estMage ? 'Maître des Arcanes' : 'Apprenti Guerrier';
 $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
 ?>
@@ -226,7 +210,7 @@ $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
         </div>
         <div class="player-info">
             <span class="class-tag"><?= $classeNom ?></span>
-            <h2><?= htmlspecialchars($_SESSION['pseudo'] ?? 'Aventurier') ?></h2>
+            <h2><?= htmlspecialchars($user['Alias']) ?></h2>
         </div>
         <?php if($estMage): ?>
             <div style="margin-left: auto; color: var(--purple); font-size: 0.8rem; font-weight: bold;">
@@ -254,9 +238,9 @@ $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
 <div class="stats-bar"> <div class="stat-item">
         <i class="fas fa-check-circle"></i> 
         <?php 
-            $reussies = ($_SESSION['NbQuetesFacileSuccess'] ?? 0) + 
-                        ($_SESSION['NbQuetesMoyenSuccess'] ?? 0) + 
-                        ($_SESSION['NbQuetesDifficileSuccess'] ?? 0);
+            $reussies = ($userStats['NbQuetesFacileSuccess'] ?? 0) + 
+                        ($userStats['NbQuetesMoyenSuccess'] ?? 0) + 
+                        ($userStats['NbQuetesDifficileSuccess'] ?? 0);
             echo $reussies;
         ?> résolues
     </div>
@@ -264,9 +248,9 @@ $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
     <div class="stat-item">
         <i class="fas fa-times-circle" style="color:var(--red);"></i> 
         <?php 
-            $total_essais = ($_SESSION['NbQuetesFacileTotal'] ?? 0) + 
-                            ($_SESSION['NbQuetesMoyenTotal'] ?? 0) + 
-                            ($_SESSION['NbQuetesDifficileTotal'] ?? 0);
+            $total_essais = ($userStats['NbQuetesFacileTotal'] ?? 0) + 
+                            ($userStats['NbQuetesMoyenTotal'] ?? 0) + 
+                            ($userStats['NbQuetesDifficileTotal'] ?? 0);
             
             $total_succes = $reussies;
             echo ($total_essais - $total_succes);
@@ -275,7 +259,7 @@ $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
 
     <div class="stat-item">
         <i class="fas fa-wand-magic-sparkles"></i> 
-        <?= min($_SESSION['quetes_magie'] ?? 0, 5) ?>/5 magie
+        <?= min($userStats['quetes_magie'] ?? 0, 5) ?>/5 magie
     </div>
 </div>
 
@@ -330,7 +314,7 @@ $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
     <div class="locked-container">
         <div class="locked-overlay">
             <i class="fas fa-lock"></i>
-            <p>Devenez Mage pour débloquer (<?= $_SESSION['quetes_magie'] ?? 0 ?>/5)</p>
+            <p>Devenez Mage pour débloquer (<?= $userStats['quetes_magie'] ?? 0 ?>/5)</p>
         </div>
         <div style="filter: blur(8px); opacity: 0.3;">
             <i class="fas fa-dragon" style="font-size: 3rem;"></i>
