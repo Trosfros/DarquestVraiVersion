@@ -1,6 +1,5 @@
 <?php
 require_once 'config.php';
-require_once 'include/user.php';
 
 if (!isset($_SESSION['user'])) {
     header('Location: login.php');

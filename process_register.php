@@ -1,6 +1,5 @@
 <?php
 require_once 'config.php';
-require 'include/user.php';
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 

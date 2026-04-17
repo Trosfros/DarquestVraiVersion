@@ -1,6 +1,5 @@
 <?php
 require_once 'config.php';
-require 'include/user.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $alias = $_POST['alias'];
