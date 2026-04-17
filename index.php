@@ -1,7 +1,7 @@
 <?php
 require_once 'config.php';
 
-$result = $connexion->query("CALL GetMarketItems(12, '', '')");
+$result = $connexion->query("CALL GetMarketItems(12, '', 'N')");
 $items = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 

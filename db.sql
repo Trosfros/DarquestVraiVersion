@@ -209,7 +209,7 @@ BEGIN
     );
 
     PREPARE stmt FROM @sql;
-    EXECUTE stmt USING p_limit, fuzz;
+    EXECUTE stmt USING fuzz, fuzz, fuzz, p_limit;
     DEALLOCATE PREPARE stmt;
 END
 //
