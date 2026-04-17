@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'include/user.php';
 
 if (!isset($_SESSION['user'])) {
     header('Location: login.php');
@@ -8,7 +9,7 @@ if (!isset($_SESSION['user'])) {
 
 $idJoueur = $_SESSION['user']['IdJoueur'];
 
-$stmt = $connexion->prepare("SELECT * FROM joueurs WHERE IdJoueur = ?");
+$stmt = $connexion->prepare("SELECT * FROM Joueurs WHERE IdJoueur = ?");
 $stmt->bind_param("i", $idJoueur);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();

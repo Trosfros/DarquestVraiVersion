@@ -214,6 +214,16 @@ BEGIN
 END
 //
 
+CREATE PROCEDURE GetItemById(Id INT)
+BEGIN 
+    SELECT i.IdItem, i.Nom, SUM(m.Quantite) AS Quantite, i.Prix, i.Description, i.image, GetItemTypeName(i.Type) as Type
+    FROM Items i
+    INNER JOIN Marche m ON m.IdItem = i.IdItem
+    WHERE i.IdItem = Id
+    GROUP BY i.IdItem, i.Nom, i.Type, i.Prix, i.Description, i.image;
+END;
+//
+
 CREATE FUNCTION IsItemIsOnMarket(v_IdItem int) 
 RETURNS TINYINT 
 DETERMINISTIC

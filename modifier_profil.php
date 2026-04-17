@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirmMdp = $_POST['confirm_mdp'] ?? '';
 
 
-    $sql = "UPDATE joueurs SET Alias = ?, Nom = ?, Prenom = ? WHERE IdJoueur = ?";
+    $sql = "UPDATE Joueurs SET Alias = ?, Nom = ?, Prenom = ? WHERE IdJoueur = ?";
     $stmt = $connexion->prepare($sql);
     $stmt->bind_param("sssi", $alias, $nom, $prenom, $idJoueur);
     
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($newMdp)) {
         if ($newMdp === $confirmMdp) {
             $hashedMdp = password_hash($newMdp, PASSWORD_BCRYPT);
-            $sqlMdp = "UPDATE joueurs SET MDP = ? WHERE IdJoueur = ?";
+            $sqlMdp = "UPDATE Joueurs SET MDP = ? WHERE IdJoueur = ?";
             $stmtMdp = $connexion->prepare($sqlMdp);
             $stmtMdp->bind_param("si", $hashedMdp, $idJoueur);
             $stmtMdp->execute();
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Récupération des infos actuelles
-$sql = "SELECT * FROM joueurs WHERE IdJoueur = ?";
+$sql = "SELECT * FROM Joueurs WHERE IdJoueur = ?";
 $stmt = $connexion->prepare($sql);
 $stmt->bind_param("i", $idJoueur);
 $stmt->execute();

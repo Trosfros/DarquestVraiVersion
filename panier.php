@@ -12,7 +12,7 @@ $hasStockError = false;
 
 if (!empty($_SESSION['cart'])) {
     foreach ($_SESSION['cart'] as $itemId => $itemQty) {
-        $sql = "SELECT IdItems, Nom, QuantiteStock, Prix, image FROM Items WHERE IdItems = ?";
+        $sql = "CALL GetItemById(?)";
         $stmt = $connexion->prepare($sql);
         $stmt->bind_param("i", $itemId);
         $stmt->execute();
@@ -20,7 +20,7 @@ if (!empty($_SESSION['cart'])) {
         
         if ($result && $result->num_rows > 0) {
             $row = $result->fetch_assoc();
-            $stockDisponible = $row['QuantiteStock'];
+            $stockDisponible = $row['Quantite'];
             $insufficient = ($itemQty > $stockDisponible);
             if ($insufficient) $hasStockError = true;
 
