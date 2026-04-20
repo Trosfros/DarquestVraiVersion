@@ -1,39 +1,34 @@
 <?php
 require_once 'config.php';
 
+$user = @ $_SESSION['user'];
 if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit();
 }
 
-$idJoueur = $_SESSION['user']['IdJoueur'];
-
-$stmt = $connexion->prepare("SELECT * FROM Joueurs WHERE IdJoueur = ?");
-$stmt->bind_param("i", $idJoueur);
-$stmt->execute();
-$user = $stmt->get_result()->fetch_assoc();
-
-if (!$user) {
-    header('Location: logout.php');
-    exit();
-}
-
 // --- LOGIQUE DES DONNÉES ---
-$alias = $user['Alias'] ?? $user['alias'] ?? 'Aventurier';
-$id = $user['IdJoueur'] ?? $user['idjoueur'] ?? 0;
-$pv = $user['PV'] ?? $user['pv'] ?? 0;
-$or = $user['PieceOr'] ?? $user['piece_or'] ?? 0;
-$argent = $user['PieceArgent'] ?? $user['piece_argent'] ?? 0;
-$bronze = $user['PieceBronze'] ?? $user['piece_bronze'] ?? 0;
+$alias = $user['Alias'];
+$pv = $user['PV'];
+$or = $user['PieceOr'];
+$argent = $user['PieceArgent'];
+$bronze = $user['PieceBronze'];
+$id = $user['IdJoueur'];
+
+$stmtUser = $connexion->prepare("CALL EnigmaUserStats(?)");
+$stmtUser->bind_param("i", $id);
+$stmtUser->execute();
+$userStats = $stmtUser->get_result()->fetch_assoc();
+$stmtUser->close();
 
 // --- CALCUL DES STATISTIQUES ---
-$f_succes = $user['NbQuetesFacileSuccess'] ?? 0;
-$m_succes = $user['NbQuetesMoyenSuccess'] ?? 0;
-$d_succes = $user['NbQuetesDifficileSuccess'] ?? 0;
+$f_succes = $userStats['FacileSuccess'];
+$m_succes = $userStats['MoyenSuccess'];
+$d_succes = $userStats['DifficileSuccess'];
 
-$f_total = $user['NbQuetesFacileTotal'] ?? 0;
-$m_total = $user['NbQuetesMoyenTotal'] ?? 0;
-$d_total = $user['NbQuetesDifficileTotal'] ?? 0;
+$f_total = $userStats['FacileTotal'];
+$m_total = $userStats['MoyenTotal'];
+$d_total = $userStats['DifficileTotal'];
 
 $totalSucces = $f_succes + $m_succes + $d_succes;
 $totalTentatives = $f_total + $m_total + $d_total;
