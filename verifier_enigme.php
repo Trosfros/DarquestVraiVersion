@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['choix'], $_POST['id_e
             }
         }
 
-        $_SESSION['feedback'] = ['message' => $id_enigme, 'status' => $status];
+        $_SESSION['feedback'] = ['message' => $message, 'status' => $status];
         UpdateUserSessionInfo();
         header("Location: enigma.php");
         exit();
