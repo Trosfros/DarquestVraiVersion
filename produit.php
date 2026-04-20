@@ -3,7 +3,7 @@ require_once 'config.php';
 
 $id_produit = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-$sql = "SELECT IdItem, Nom, Description, Prix, QuantiteStock, Type, image FROM Items WHERE IdItem = ?";
+$sql = "CALL GetItemById(?)";
 $stmt = $connexion->prepare($sql);
 $stmt->bind_param("i", $id_produit);
 $stmt->execute();
@@ -15,8 +15,8 @@ if ($result->num_rows === 0) {
 }
 
 $produit = $result->fetch_assoc();
-$isOutOfStock = ($produit['QuantiteStock'] <= 0);
-$stockMax = intval($produit['QuantiteStock']);
+$isOutOfStock = ($produit['Quantite'] <= 0);
+$stockMax = intval($produit['Quantite']);
 ?>
 
 <!DOCTYPE html>
@@ -127,8 +127,8 @@ $stockMax = intval($produit['QuantiteStock']);
 
 <main class="product-detail-container">
     <div class="product-image-box <?= $isOutOfStock ? 'out-of-stock' : '' ?>">
-        <?php if (!empty($produit['chemin_image'])): ?>
-            <img src="img/<?= htmlspecialchars($produit['chemin_image']) ?>" alt="<?= htmlspecialchars($produit['Nom']) ?>">
+        <?php if (!empty($produit['image'])): ?>
+            <img src="img/<?= htmlspecialchars($produit['image']) ?>" alt="<?= htmlspecialchars($produit['Nom']) ?>">
         <?php else: ?>
             <div style="color: #ccc; text-align: center;">🖼️ Aucun visuel</div>
         <?php endif; ?>

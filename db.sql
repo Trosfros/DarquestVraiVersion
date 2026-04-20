@@ -293,7 +293,11 @@ IF MageCheck >= 5 && Itemtype = "S" THEN
    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "cannot buy spells if you aren't a wizard";
 END IF; 
  IF Itemprice IS NOT NULL AND itemQuantity>=quantite THEN 
-  Set TotalPrice = ItemPrice * quantite;
+    IF Itemtype = "S" THEN
+     Set TotalPrice = (ItemPrice* 1.1)* quantite;
+    ELSE 
+      Set TotalPrice = (ItemPrice* 0.6)* quantite;
+    END IF;
     IF PlayerMoney >= TotalPrice THEN 
       
      UPDATE Joueurs SET  Joueurs.PieceOr  = Joueurs.PieceOr - TotalPrice 
@@ -327,44 +331,44 @@ END IF;
 END IF;
 END
 //
--- CREATE PROCEDURE SellItem
--- (
--- IdJoueur INT,
--- IdItem INT,
--- Quantite INT
--- )
--- BEGIN 
---  DECLARE InventoryQt INT;
---   Declare MarketItemCount INT;
+CREATE PROCEDURE SellItem
+(
+IdJoueur INT,
+IdItem INT,
+Quantite INT
+)
+BEGIN 
+ DECLARE InventoryQt INT;
+  Declare MarketItemCount INT;
   
---  SELECT Quantite INTO InventoryQt
---   FROM Inventaire as inv
---   WHERE inv.IdJoueur = IdJoueur AND inv.IdItems = IdItem;
+ SELECT Quantite INTO InventoryQt
+  FROM Inventaires as inv
+  WHERE inv.IdJoueur = IdJoueur AND inv.IdItem = IdItem;
 
---   IF InventoryQt >= Quantite THEN 
---     UPDATE Inventaire as inv
---     SET Quantite = inv.Quantite- Quantite
---     WHERE IdJoueur = IdJoueur AND IdItems = IdItem;
---     SELECT COUNT(*) INTO MarketItemCount
---     FROM Marcher m
---     WHERE m.IdItems = IdItem AND IdJoueur = m.IdJoueur;
---     Delete 
---     from Inventaire as inv 
---     WHERE inv.Quantite = 0;
---     if MarketItemCount=0 THEN
---       INSERT INTO Marcher (IdJoueur,IdItems,Quantité)
---        VALUES (IdJoueur,IdItem,Quantite);
---     ELSE 
---       UPDATE Marcher m
---       set Quantité = Quantité + Quantite
---       WHERE m.IdItems = IdItem AND IdJoueur = m.IdJoueur;
---     END IF;
+  IF InventoryQt >= Quantite THEN 
+    UPDATE Inventaires as inv
+    SET inv.Quantite = inv.Quantite- Quantite
+    WHERE inv.IdJoueur = IdJoueur AND inv.IdItem = IdItem;
+    SELECT COUNT(*) INTO MarketItemCount
+    FROM Marche m
+    WHERE m.IdItem = IdItem AND IdJoueur = m.IdJoueur;
+    Delete 
+    from Inventaires as inv 
+    WHERE inv.Quantite = 0;
+    if MarketItemCount=0 THEN
+      INSERT INTO Marche (IdJoueur,IdItem,Quantite)
+       VALUES (IdJoueur,IdItem,Quantite);
+    ELSE 
+      UPDATE Marche m
+      set m.Quantite = m.Quantite + Quantite
+      WHERE m.IdItem = IdItem AND IdJoueur = m.IdJoueur;
+    END IF;
     
---   ELSE 
---     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Not enough items in inventory';
---   END IF;
--- END;
--- //
+  ELSE 
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Not enough items in inventory';
+  END IF;
+END;
+//
 
 delimiter ;
 

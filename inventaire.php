@@ -31,6 +31,7 @@ if ($result->num_rows > 0) {
     <meta charset="UTF-8">
     <title>AVERSE - Inventaire</title>
     <link rel="stylesheet" href="CSS/style.css">
+    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #ffffff; color: #333; font-family: 'Roboto', sans-serif; }
@@ -82,7 +83,7 @@ if ($result->num_rows > 0) {
                     <h3 style="margin: 5px 0;"><?= htmlspecialchars($item['Nom']) ?></h3>
                     <p style="color: #d4af37; font-weight: bold;">Quantité : <?= $item['Quantite'] ?></p>
                     
-                    <button class="btn btn-sell" onclick="openModal('<?= addslashes(htmlspecialchars($item['IdItem'])),$item['Nom'] ?>')">Vendre</button>
+                    <button class="btn btn-sell" onclick="openModal('<?= $item['Nom'] ?>')">Vendre</button>
                     <button class="btn btn-use">Utiliser</button>
                 </div>
             <?php endforeach; ?>
@@ -96,31 +97,18 @@ if ($result->num_rows > 0) {
         <p>Voulez-vous vraiment vendre <br><strong id="itemNameModal">l'objet</strong> ?</p>
         <div class="modal-buttons">
             <button class="btn" style="background: #ccc;" onclick="closeModal()">Annuler</button>
-            <button class="btn btn-sell" onclick="processSale()">Confirmer la vente</button>
+            <button class="btn btn-sell" onclick="processSale('<?= addslashes(htmlspecialchars($item['IdItem']))?>')">Confirmer la vente</button>
         </div>
     </div>
 </div>
-
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>   
 <script>
     let itemToSell = "";
 
-    function openModal(id,nom) {
+    function openModal(nom) {
         itemToSell = nom;
         
-        post('vendre.php', {value:id})
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                //we need some cool ass sell confirmation here 
-                
-            }else {
-                alert("Erreur : " + data.message);
-                location.reload();
-            }
-        })
-        .catch(error => {
-                console.error('Erreur:',error );
-        });
+     
         document.getElementById('itemNameModal').innerText = nom;
         document.getElementById('confirmModal').style.display = 'flex';
     }
@@ -129,11 +117,20 @@ if ($result->num_rows > 0) {
         document.getElementById('confirmModal').style.display = 'none';
     }
 
-    function processSale() {
+    function processSale(id) {
        
         console.log("Vente de : " + itemToSell);
-         $_Session["SoldItem"] = "";
+         <?php $_SESSION["SoldItem"] = ""; ?>
+            $.post('vendre.php', {id:id})
+             .done(function(data) {
+                
+              console.log("Data Loaded: " + data.success);  
+             })
+             .fail(function() {
+             alert("Error occurred.");
+            });
         closeModal();
+      
       
     }
 
