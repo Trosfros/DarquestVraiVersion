@@ -364,7 +364,7 @@ END
 --     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Not enough items in inventory';
 --   END IF;
 -- END;
-//
+-- //
 
 delimiter ;
 
