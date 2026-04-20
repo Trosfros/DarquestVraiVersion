@@ -318,26 +318,26 @@ BEGIN
   Declare MarketItemCount INT;
   
  SELECT Quantite INTO InventoryQt
-  FROM Inventaire as inv
-  WHERE inv.IdJoueur = IdJoueur AND inv.IdItems = IdItem;
+  FROM Inventaires as inv
+  WHERE inv.IdJoueur = IdJoueur AND inv.IdItem = IdItem;
 
   IF InventoryQt >= Quantite THEN 
-    UPDATE Inventaire as inv
-    SET Quantite = inv.Quantite- Quantite
-    WHERE IdJoueur = IdJoueur AND IdItems = IdItem;
+    UPDATE Inventaires as inv
+    SET inv.Quantite = inv.Quantite- Quantite
+    WHERE inv.IdJoueur = IdJoueur AND inv.IdItem = IdItem;
     SELECT COUNT(*) INTO MarketItemCount
-    FROM Marcher m
-    WHERE m.IdItems = IdItem AND IdJoueur = m.IdJoueur;
+    FROM Marche m
+    WHERE m.IdItem = IdItem AND IdJoueur = m.IdJoueur;
     Delete 
-    from Inventaire as inv 
+    from Inventaires as inv 
     WHERE inv.Quantite = 0;
     if MarketItemCount=0 THEN
-      INSERT INTO Marcher (IdJoueur,IdItems,Quantité)
+      INSERT INTO Marche (IdJoueur,IdItem,Quantite)
        VALUES (IdJoueur,IdItem,Quantite);
     ELSE 
-      UPDATE Marcher m
-      set Quantité = Quantité + Quantite
-      WHERE m.IdItems = IdItem AND IdJoueur = m.IdJoueur;
+      UPDATE Marche m
+      set m.Quantite = m.Quantite + Quantite
+      WHERE m.IdItem = IdItem AND IdJoueur = m.IdJoueur;
     END IF;
     
   ELSE 
