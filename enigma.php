@@ -7,14 +7,11 @@ if (!isset($user)) {
     exit();
 }
 
-$stmtUser = $connexion->prepare("SELECT QuetesMagieReussies, EstMage, 
-    NbQuetesFacileSuccess, NbQuetesFacileTotal, 
-    NbQuetesMoyenSuccess, NbQuetesMoyenTotal, 
-    NbQuetesDifficileSuccess, NbQuetesDifficileTotal, 
-    PV FROM Joueurs WHERE IdJoueur = ?");
+$stmtUser = $connexion->prepare("CALL EnigmaUserStats(?)");
 $stmtUser->bind_param("i", $user['IdJoueur']);
 $stmtUser->execute();
 $userStats = $stmtUser->get_result()->fetch_assoc();
+$stmtUser->close();
 
 $is_playing = false;
 $enigme = null;
@@ -238,9 +235,9 @@ $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
 <div class="stats-bar"> <div class="stat-item">
         <i class="fas fa-check-circle"></i> 
         <?php 
-            $reussies = ($userStats['NbQuetesFacileSuccess'] ?? 0) + 
-                        ($userStats['NbQuetesMoyenSuccess'] ?? 0) + 
-                        ($userStats['NbQuetesDifficileSuccess'] ?? 0);
+            $reussies = ($userStats['FacileSuccess']) + 
+                        ($userStats['MoyenSuccess']) + 
+                        ($userStats['DifficileSuccess']);
             echo $reussies;
         ?> résolues
     </div>
@@ -248,9 +245,9 @@ $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
     <div class="stat-item">
         <i class="fas fa-times-circle" style="color:var(--red);"></i> 
         <?php 
-            $total_essais = ($userStats['NbQuetesFacileTotal'] ?? 0) + 
-                            ($userStats['NbQuetesMoyenTotal'] ?? 0) + 
-                            ($userStats['NbQuetesDifficileTotal'] ?? 0);
+            $total_essais = ($userStats['FacileTotal']) + 
+                            ($userStats['MoyenTotal']) + 
+                            ($userStats['DifficileTotal']);
             
             $total_succes = $reussies;
             echo ($total_essais - $total_succes);
@@ -259,7 +256,7 @@ $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
 
     <div class="stat-item">
         <i class="fas fa-wand-magic-sparkles"></i> 
-        <?= min($userStats['quetes_magie'] ?? 0, 5) ?>/5 magie
+        <?= min($userStats['StreakMagie'], 5) ?>/5 magie
     </div>
 </div>
 
@@ -314,7 +311,7 @@ $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
     <div class="locked-container">
         <div class="locked-overlay">
             <i class="fas fa-lock"></i>
-            <p>Devenez Mage pour débloquer (<?= $userStats['quetes_magie'] ?? 0 ?>/5)</p>
+            <p>Devenez Mage pour débloquer (<?= $userStats['StreakMagie']?>/5)</p>
         </div>
         <div style="filter: blur(8px); opacity: 0.3;">
             <i class="fas fa-dragon" style="font-size: 3rem;"></i>
@@ -341,7 +338,7 @@ $classeIcon = $estMage ? 'fa-hat-wizard' : 'fa-hammer';
             <h2 class="question-text"><?= htmlspecialchars($enigme['Question']) ?></h2>
 
             <form action="verifier_enigme.php" method="POST" class="choices-grid">
-                <input type="hidden" name="id_enigme" value="<?= $enigme['IdEnigme'] ?>">
+                <input type="hidden" name="id_enigme" value="<?=$enigme['IdEnigme']?>">
                 <button type="submit" name="choix" value="1" class="choice-btn"><?= htmlspecialchars($enigme['Reponse1']) ?></button>
                 <button type="submit" name="choix" value="2" class="choice-btn"><?= htmlspecialchars($enigme['Reponse2']) ?></button>
                 <button type="submit" name="choix" value="3" class="choice-btn"><?= htmlspecialchars($enigme['Reponse3']) ?></button>
