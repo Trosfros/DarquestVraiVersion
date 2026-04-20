@@ -290,6 +290,7 @@ function validerCommande() {
         btn.disabled = false;
         btn.innerText = "Réessayer";
     });
+   
 }
 </script>
 </body>

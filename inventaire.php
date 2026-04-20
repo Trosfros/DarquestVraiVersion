@@ -131,6 +131,7 @@ if ($result->num_rows > 0) {
             });
         closeModal();
       
+      
     }
 
     window.onclick = function(event) {
