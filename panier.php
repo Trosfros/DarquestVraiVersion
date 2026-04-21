@@ -12,7 +12,6 @@ $hasStockError = false;
 
 if (!empty($_SESSION['cart'])) {
     foreach ($_SESSION['cart'] as $itemId => $itemQty) {
-
         $sql = "CALL GetItemById(?)";
         $stmt = $connexion->prepare($sql);
         $stmt->bind_param("i", $itemId);
@@ -155,9 +154,9 @@ if (!empty($_SESSION['cart'])) {
             <div class="cart-items-list">
                 <?php foreach ($items as $item): ?>
                 <div class="cart-item <?= $item['insufficient'] ? 'item-error' : '' ?>">
-                    <div class="item-img-box">
+                    <a href="produit.php?id=<?= $item['id']?>" class="item-img-box">
                         <img src="img/<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
-                    </div>
+                    </a>
 
                     <div class="item-details">
                         <h3 style="margin: 0 0 5px 0; font-size: 1.1rem;"><?= htmlspecialchars($item['name']) ?></h3>
@@ -170,21 +169,21 @@ if (!empty($_SESSION['cart'])) {
                         <?php endif; ?>
 
                         <div class="quantity-control">
-    <button class="qty-btn" onclick="updateQty(<?= $item['id'] ?>, -1)">
-        <?= ($item['qty'] > 1) ? '<i class="fa-solid fa-minus"></i>' : '<i class="fa-solid fa-trash-can" style="color:#e74c3c"></i>' ?>
-    </button>
+                            <button class="qty-btn" onclick="updateQty(<?= $item['id'] ?>, -1)">
+                                <?= ($item['qty'] > 1) ? '<i class="fa-solid fa-minus"></i>' : '<i class="fa-solid fa-trash-can" style="color:#e74c3c"></i>' ?>
+                            </button>
 
-    <input type="number"
-           class="qty-input"
-           value="<?= $item['qty'] ?>"
-           min="1"
-           max="<?= $item['stock'] ?>"
-           onchange="setManualQty(<?= $item['id'] ?>, this.value)">
+                            <input type="number"
+                                class="qty-input"
+                                value="<?= $item['qty'] ?>"
+                                min="1"
+                                max="<?= $item['stock'] ?>"
+                                onchange="setManualQty(<?= $item['id'] ?>, this.value)">
 
-    <button class="qty-btn" onclick="updateQty(<?= $item['id'] ?>, 1)">
-        <i class="fa-solid fa-plus"></i>
-    </button>
-</div>
+                            <button class="qty-btn" onclick="updateQty(<?= $item['id'] ?>, 1)">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
                     </div>
                     <div style="text-align: right;">
                         <div style="font-size: 1.3rem; font-weight: 700; color: #d4af37;"><?= $item['price'] * $item['qty'] ?> 🟡</div>
