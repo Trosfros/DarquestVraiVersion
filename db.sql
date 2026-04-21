@@ -331,44 +331,44 @@ END IF;
 END IF;
 END
 //
-CREATE PROCEDURE SellItem
-(
-IdJoueur INT,
-IdItem INT,
-Quantite INT
-)
-BEGIN 
- DECLARE InventoryQt INT;
-  Declare MarketItemCount INT;
+-- CREATE PROCEDURE SellItem
+-- (
+-- IdJoueur INT,
+-- IdItem INT,
+-- Quantite INT
+-- )
+-- BEGIN 
+--  DECLARE InventoryQt INT;
+--   Declare MarketItemCount INT;
   
- SELECT Quantite INTO InventoryQt
-  FROM Inventaires as inv
-  WHERE inv.IdJoueur = IdJoueur AND inv.IdItem = IdItem;
+--  SELECT Quantite INTO InventoryQt
+--   FROM Inventaires as inv
+--   WHERE inv.IdJoueur = IdJoueur AND inv.IdItem = IdItem;
 
-  IF InventoryQt >= Quantite THEN 
-    UPDATE Inventaires as inv
-    SET inv.Quantite = inv.Quantite- Quantite
-    WHERE inv.IdJoueur = IdJoueur AND inv.IdItem = IdItem;
-    SELECT COUNT(*) INTO MarketItemCount
-    FROM Marche m
-    WHERE m.IdItem = IdItem AND IdJoueur = m.IdJoueur;
-    Delete 
-    from Inventaires as inv 
-    WHERE inv.Quantite = 0;
-    if MarketItemCount=0 THEN
-      INSERT INTO Marche (IdJoueur,IdItem,Quantite)
-       VALUES (IdJoueur,IdItem,Quantite);
-    ELSE 
-      UPDATE Marche m
-      set m.Quantite = m.Quantite + Quantite
-      WHERE m.IdItem = IdItem AND IdJoueur = m.IdJoueur;
-    END IF;
+--   IF InventoryQt >= Quantite THEN 
+--     UPDATE Inventaires as inv
+--     SET inv.Quantite = inv.Quantite- Quantite
+--     WHERE inv.IdJoueur = IdJoueur AND inv.IdItem = IdItem;
+--     SELECT COUNT(*) INTO MarketItemCount
+--     FROM Marche m
+--     WHERE m.IdItem = IdItem AND IdJoueur = m.IdJoueur;
+--     Delete 
+--     from Inventaires as inv 
+--     WHERE inv.Quantite = 0;
+--     if MarketItemCount=0 THEN
+--       INSERT INTO Marche (IdJoueur,IdItem,Quantite)
+--        VALUES (IdJoueur,IdItem,Quantite);
+--     ELSE 
+--       UPDATE Marche m
+--       set m.Quantite = m.Quantite + Quantite
+--       WHERE m.IdItem = IdItem AND IdJoueur = m.IdJoueur;
+--     END IF;
     
-  ELSE 
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Not enough items in inventory';
-  END IF;
-END;
-//
+--   ELSE 
+--     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Not enough items in inventory';
+--   END IF;
+-- END;
+-- //
 
 delimiter ;
 
@@ -388,13 +388,13 @@ INSERT INTO Items (Nom, Type, Prix, Description, image) VALUES
   ('Potion Magique De Glace', 'P', 26, 'Gèle les ennemies de toute tailles!', 'potion2.png'),
   ('Potion Magique De Feu', 'P', 39, 'Attention sa brule!', 'potion3.png');
 
-INSERT INTO Joueurs (Alias, Nom, Prenom, MDP) VALUES
-  ('Trosfros', 'Guichard', 'Maxime', 0x243279243130246a6a667838374f3069666748465251715932685a4f65724f55754b6c6f43644c4f506f38645079317576506a34714b633277304943),
-  ('Frou_Frou', 'Perron', 'Gabriel', 0x243279243130246b446647385a32445654434f6c5054616959416331652e6e4d555a7a526376684a616641795837504f58724b51454b63624e4c394f),
-  ('Lebon', 'Lebon', 'Pascal', 0x24327924313024416d6d4968546832456f47736469437575754e72397569474f6f444f6866444c417259365a4e6b424a334d674f7a6a305a725a6453),
-  ('Orisa', 'Orisa', 'Orisa', 0x243279243130244536595a6b454a735873636a566a2e4b5649322e794f6b506955386c4b756e51524c4649326a554a622e5168575062564c7371766d),
-  ('fdwefewf', 'bonjour', 'salut', 0x2432792431302461764f446c396e38444c4a3444776d457864546245654a6e746c543043366b47753965724a5a2f444462795857314e652e5043414b),
-  ('tamere', 'tamere', 'tamere', 0x243279243130242e4d6c30486b4533617a52746c4d6a6d45572f304b4f397a4439502e366a687956436545597041385a4c732e4c47496c7546526447);
+INSERT INTO Joueurs (Alias, Nom, Prenom, MDP, EstAdmin) VALUES
+  ('Trosfros', 'Guichard', 'Maxime', 0x243279243130246a6a667838374f3069666748465251715932685a4f65724f55754b6c6f43644c4f506f38645079317576506a34714b633277304943, 1),
+  ('Frou_Frou', 'Perron', 'Gabriel', 0x243279243130246b446647385a32445654434f6c5054616959416331652e6e4d555a7a526376684a616641795837504f58724b51454b63624e4c394f, 1),
+  ('Lebon', 'Lebon', 'Pascal', 0x24327924313024416d6d4968546832456f47736469437575754e72397569474f6f444f6866444c417259365a4e6b424a334d674f7a6a305a725a6453, 0),
+  ('Orisa', 'Orisa', 'Orisa', 0x243279243130244536595a6b454a735873636a566a2e4b5649322e794f6b506955386c4b756e51524c4649326a554a622e5168575062564c7371766d, 0),
+  ('fdwefewf', 'bonjour', 'salut', 0x2432792431302461764f446c396e38444c4a3444776d457864546245654a6e746c543043366b47753965724a5a2f444462795857314e652e5043414b, 0),
+  ('tamere', 'tamere', 'tamere', 0x243279243130242e4d6c30486b4533617a52746c4d6a6d45572f304b4f397a4439502e366a687956436545597041385a4c732e4c47496c7546526447, 0);
 
 INSERT INTO Marche (IdJoueur, IdItem, Quantite) VALUES
   (1, 1, 15),

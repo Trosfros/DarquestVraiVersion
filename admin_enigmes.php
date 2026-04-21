@@ -1,6 +1,6 @@
 <?php
-require 'check_admin.php'; 
 require_once 'config.php';
+require 'check_admin.php'; 
 
 $message = "";
 
@@ -15,16 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_enigme'])) {
 
     $difficulte = $idCategorie;
 
+    $sql = "INSERT INTO Enigme (IdCategorie, Difficulte, Question, Reponse1, Reponse2, Reponse3, Reponse4, BonneReponse)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-    $est_magie = ($idCategorie == 3) ? 1 : 0;
-
-    $sql = "INSERT INTO enigme (IdCategorie, Difficulte, Question, Reponse1, Reponse2, Reponse3, Reponse4, BonneReponse, EstMagie) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
     $stmt = $connexion->prepare($sql);
-    
+
     // "iisssssii" = 9 paramètres
-    $stmt->bind_param("iisssssii", 
+    $stmt->bind_param("iisssssi", 
         $idCategorie, 
         $difficulte, 
         $question, 
@@ -32,13 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_enigme'])) {
         $r2, 
         $r3, 
         $r4, 
-        $bonne_rep, 
-        $est_magie
+        $bonne_rep
     );
 
     if ($stmt->execute()) {
-        $msg_status = ($est_magie == 1) ? "Magique ✨" : "Standard ⚔️";
-        $message = "<p style='color: #27ae60; font-weight: bold;'>📜 Quête scellée avec succès ! ($msg_status)</p>";
+        $message = "<p style='color: #27ae60; font-weight: bold;'>📜 Quête scellée avec succès !</p>";
     } else {
         $message = "<p style='color: #e74c3c;'>❌ Erreur SQL : " . $stmt->error . "</p>";
     }
