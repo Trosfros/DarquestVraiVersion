@@ -140,7 +140,7 @@ $stockMax = intval($produit['Quantite']);
         <div class="badges-container">
             <span class="category-badge">🏷️ <?= htmlspecialchars($produit['Type']) ?></span>
             <span class="stock-badge <?= $isOutOfStock ? 'empty' : '' ?>">
-                <?= $isOutOfStock ? '❌ Rupture' : '📦 ' . $produit['QuantiteStock'] . ' en stock' ?>
+                <?= $isOutOfStock ? '❌ Rupture' : '📦 ' . $produit['Quantite'] . ' en stock' ?>
             </span>
         </div>
 
