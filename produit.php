@@ -56,6 +56,7 @@ $stockMax = intval($produit['Quantite']);
 
         <h1><?= htmlspecialchars($produit['Nom']) ?></h1>
         <p class="description"><?= nl2br(htmlspecialchars($produit['Description'])) ?></p>
+        <p class="description">Vendeur: <?= htmlspecialchars($produit['Vendeur']) ?></p>
 
         <div class="price-tag"><?= number_format($produit['Prix'], 0, '.', ' ') ?> 🟡 <span>OR</span></div>
 

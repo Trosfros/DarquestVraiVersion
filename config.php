@@ -16,4 +16,7 @@ if ($connexion->connect_error) {
 }
 
 $connexion->set_charset("utf8");
+
+if (isset($_SESSION['user']))
+    UpdateUserSessionInfo();
 ?>
