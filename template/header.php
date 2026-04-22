@@ -252,6 +252,7 @@
                     <a href="catalogue.php?search=Armure">🛡️ Armures</a>
                     <a href="catalogue.php?search=Arme">⚔️ Armes</a>
                     <a href="catalogue.php?search=Potion">🧪 Potions</a>
+                    <a href="catalogue.php?search=Sort">𑽎 Sorts</a>
                 </div>
             </div>
 
