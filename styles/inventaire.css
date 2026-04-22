@@ -1,6 +1,6 @@
-  body { background-color: #ffffff; color: #333; font-family: 'Roboto', sans-serif; }
+  body { background-color: #ffffff; color: #333; font-family: 'Roboto', sans-serif; margin: 0px 0px 0px 0px;  }
         .inventory-container { max-width: 1200px; margin: 40px auto; padding: 0 20px; text-align: center; }
-        .inventory-title { font-family: 'Cinzel', serif; color: #d4af37; margin-bottom: 30px; }
+        .inventory-title { font-family: 'Cinzel', serif; color: #d4af37; margin-bottom: 30px; margin: 0 }
         
         /* Grille d'inventaire */
         .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
