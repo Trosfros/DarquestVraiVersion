@@ -157,7 +157,7 @@ if (!empty($_SESSION['cart'])) {
         </div>
     </div>
 </div>
-
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>   
 <script>
 const currentCart = {
     <?php foreach($items as $item): ?>
@@ -216,7 +216,7 @@ function validerCommande() {
         btn.disabled = false;
         btn.innerText = "Réessayer";
     });
-   
+
 }
 </script>
 </body>

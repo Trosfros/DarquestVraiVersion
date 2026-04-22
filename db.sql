@@ -270,12 +270,36 @@ BEGIN
 END;
 //
 
+Create PROCEDURE ConvertCoinsToGold(
+  IdJoueur INT
+)
+BEGIN
+DECLARE PlayerBronze INT;
+DECLARE PlayerSilver INT;
+DECLARE PlayerGold INT;
+Declare ConvertedBronze INT;
+Declare ConvertedSilver INT;
+
+SELECT PieceBronze,PieceArgent,PieceOr INTO PlayerBronze,PlayerSilver,PlayerGold
+FROM Joueurs J
+WHERE J.IdJoueur = IdJoueur; 
+
+SELECT PlayerSilver DIV 10,PlayerBronze DIV 100 INTO ConvertedSilver,ConvertedBronze;
+
+Update Joueurs as J
+set 
+PieceBronze = PlayerBronze - ConvertedBronze * 100,
+PieceArgent = PlayerSilver - ConvertedSilver * 10,
+PieceOr = PlayerGold + ConvertedBronze + ConvertedSilver
+WHERE J.IdJoueur = IdJoueur;
+END
+//
+
 CREATE PROCEDURE BuyItem(
   IdJoueur INT,
   Iditem INT,
   quantite INT
   )
-
 BEGIN
 DECLARE ItemPrice INT;
 DECLARE PlayerMoney INT;
@@ -284,6 +308,9 @@ DECLARE itemQuantity INT;
 DECLARE SellerId INT; 
 DECLARE InvAmount INT;
 DECLARE MageCheck INT; 
+DECLARE PlayerBronze INT;
+DECLARE PlayerSilver INT;
+
 Declare Itemtype VARCHAR(20);
 
 SELECT Prix, Type INTO ItemPrice, Itemtype
@@ -297,6 +324,8 @@ LIMIT 1;
 SELECT PieceOr INTO PlayerMoney
 FROM Joueurs
 WHERE IdJoueur = Joueurs.IdJoueur;
+
+CALL ConvertCoinsToGold(IdJoueur);
 IF MageCheck = 0 && Itemtype = "S" THEN 
    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "cannot buy spells if you aren't a wizard";
 END IF; 
