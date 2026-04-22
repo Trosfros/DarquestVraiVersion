@@ -107,8 +107,7 @@ if ($result->num_rows > 0) {
 
     function openModal(nom) {
         itemToSell = nom;
-        
-     
+
         document.getElementById('itemNameModal').innerText = nom;
         document.getElementById('confirmModal').style.display = 'flex';
     }
@@ -118,20 +117,16 @@ if ($result->num_rows > 0) {
     }
 
     function processSale(id) {
-       
         console.log("Vente de : " + itemToSell);
-         <?php $_SESSION["SoldItem"] = ""; ?>
-            $.post('vendre.php', {id:id})
-             .done(function(data) {
-                
-              console.log("Data Loaded: " + data.success);  
-             })
-             .fail(function() {
-             alert("Error occurred.");
+        <?php $_SESSION["SoldItem"] = ""; ?>
+        $.post('vendre.php', {id:id})
+            .done(function(data) {
+                location.reload()
+            })
+            .fail(function() {
+                alert("Error occurred.");
             });
         closeModal();
-      
-      
     }
 
     window.onclick = function(event) {

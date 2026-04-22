@@ -298,9 +298,9 @@ END IF;
     ELSE 
       Set TotalPrice = (ItemPrice* 0.6)* quantite;
     END IF;
-    IF PlayerMoney >= TotalPrice THEN 
+    IF PlayerMoney >= ItemPrice THEN 
       
-     UPDATE Joueurs SET  Joueurs.PieceOr  = Joueurs.PieceOr - TotalPrice 
+     UPDATE Joueurs SET  Joueurs.PieceOr  = Joueurs.PieceOr - ItemPrice 
      WHERE IdJoueur = Joueurs.IdJoueur;
      UPDATE Joueurs 
      SET Joueurs.PieceOr = Joueurs.PieceOr + TotalPrice
@@ -314,7 +314,6 @@ END IF;
       Delete from Marche
       where Marche.Quantite = 0;
       if InvAmount = 0 THEN 
-     
         insert 
         into Inventaires (IdJoueur,IdItem,Quantite)
         VALUES (IdJoueur, Iditem, quantite);
@@ -331,6 +330,7 @@ END IF;
 END IF;
 END
 //
+
 CREATE PROCEDURE SellItem
 (
 IdJoueur INT,
@@ -351,7 +351,7 @@ BEGIN
     WHERE inv.IdJoueur = IdJoueur AND inv.IdItem = IdItem;
     SELECT COUNT(*) INTO MarketItemCount
     FROM Marche WHERE IdItem = IdItem AND IdJoueur = IdJoueur;
-    DELETE FROM Inventaires WHERE Quantite = 0;
+    DELETE FROM Inventaires WHERE Inventaires.Quantite = 0;
     if MarketItemCount = 0 THEN
       INSERT INTO Marche (IdJoueur,IdItem,Quantite)
        VALUES (IdJoueur,IdItem,Quantite);
