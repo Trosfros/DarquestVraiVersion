@@ -83,8 +83,8 @@ if ($result->num_rows > 0) {
                     <h3 style="margin: 5px 0;"><?= htmlspecialchars($item['Nom']) ?></h3>
                     <p style="color: #d4af37; font-weight: bold;">Quantité : <?= $item['Quantite'] ?></p>
                     
-                    <button class="btn btn-sell" onclick="openModal('<?= $item['Nom'] ?>')">Vendre</button>
-                    <button class="btn btn-use">Utiliser</button>
+                    <button class="btn btn-sell" onclick="openModal(this, '<?= $item['Nom'] ?>', () => processSale(<?= $item['IdItem']?>))">Vendre</button>
+                    <button class="btn btn-use" onclick="openModal(this, '<?= $item['Nom'] ?>', () => useItem(<?= $item['IdItem']?>))">Utiliser</button>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -94,21 +94,24 @@ if ($result->num_rows > 0) {
 <div id="confirmModal" class="modal-overlay">
     <div class="modal-content">
         <h2>Confirmation</h2>
-        <p>Voulez-vous vraiment vendre <br><strong id="itemNameModal">l'objet</strong> ?</p>
+        <p>Voulez-vous vraiment <span id="actionNameModal"></span><br>
+            <strong id="itemNameModal">l'objet</strong> ?</p>
         <div class="modal-buttons">
             <button class="btn" style="background: #ccc;" onclick="closeModal()">Annuler</button>
-            <button class="btn btn-sell" onclick="processSale('<?= addslashes(htmlspecialchars($item['IdItem']))?>')">Confirmer la vente</button>
+            <button id="btn-confirm"/>
         </div>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>   
 <script>
-    let itemToSell = "";
-
-    function openModal(nom) {
-        itemToSell = nom;
+    function openModal(btn, nom, cb) {
+        const confirmBtn = document.getElementById('btn-confirm');
+        confirmBtn.textContent = btn.innerText;
+        confirmBtn.className = btn.className;
+        confirmBtn.onclick = cb;
 
         document.getElementById('itemNameModal').innerText = nom;
+        document.getElementById('actionNameModal').innerText = btn.innerText;
         document.getElementById('confirmModal').style.display = 'flex';
     }
 
@@ -117,9 +120,18 @@ if ($result->num_rows > 0) {
     }
 
     function processSale(id) {
-        console.log("Vente de : " + itemToSell);
-        <?php $_SESSION["SoldItem"] = ""; ?>
         $.post('vendre.php', {id:id})
+            .done(function(data) {
+                location.reload()
+            })
+            .fail(function() {
+                alert("Error occurred.");
+            });
+        closeModal();
+    }
+
+    function useItem(id) {
+        $.post('useItem.php', {id:id})
             .done(function(data) {
                 location.reload()
             })
