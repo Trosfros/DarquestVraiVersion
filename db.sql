@@ -297,7 +297,7 @@ END IF;
     END IF;
     IF PlayerMoney >= ItemPrice THEN 
       
-     UPDATE Joueurs SET  Joueurs.PieceOr  = Joueurs.PieceOr - ItemPrice 
+     UPDATE Joueurs SET  Joueurs.PieceOr  = Joueurs.PieceOr - ItemPrice * Quantite
      WHERE IdJoueur = Joueurs.IdJoueur;
      UPDATE Joueurs 
      SET Joueurs.PieceOr = Joueurs.PieceOr + TotalPrice
