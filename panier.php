@@ -17,6 +17,7 @@ if (!empty($_SESSION['cart'])) {
         $stmt->bind_param("i", $itemId);
         $stmt->execute();
         $result = $stmt->get_result();
+        $stmt->close();
 
         if ($result && $result->num_rows > 0) {
             $row = $result->fetch_assoc();

@@ -83,8 +83,8 @@ if ($result->num_rows > 0) {
                     <h3 style="margin: 5px 0;"><?= htmlspecialchars($item['Nom']) ?></h3>
                     <p style="color: #d4af37; font-weight: bold;">Quantité : <?= $item['Quantite'] ?></p>
                     
-                    <button class="btn btn-sell" onclick="openModal(this, '<?= $item['Nom'] ?>', () => processSale(<?= $item['IdItem']?>))">Vendre</button>
-                    <button class="btn btn-use" onclick="openModal(this, '<?= $item['Nom'] ?>', () => useItem(<?= $item['IdItem']?>))">Utiliser</button>
+                    <button class="btn btn-sell" onclick="openModal(this, '<?= $item['Nom'] ?>', <?= $item['IdItem']?>, 'vendre.php')">Vendre</button>
+                    <button class="btn btn-use" onclick="openModal(this, '<?= $item['Nom'] ?>', <?= $item['IdItem']?>, 'useItem.php')">Utiliser</button>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -104,11 +104,11 @@ if ($result->num_rows > 0) {
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>   
 <script>
-    function openModal(btn, nom, cb) {
+    function openModal(btn, nom, id, fichier) {
         const confirmBtn = document.getElementById('btn-confirm');
         confirmBtn.textContent = btn.innerText;
         confirmBtn.className = btn.className;
-        confirmBtn.onclick = cb;
+        confirmBtn.onclick = () => onConfirm(id, fichier)
 
         document.getElementById('itemNameModal').innerText = nom;
         document.getElementById('actionNameModal').innerText = btn.innerText;
@@ -119,19 +119,8 @@ if ($result->num_rows > 0) {
         document.getElementById('confirmModal').style.display = 'none';
     }
 
-    function processSale(id) {
-        $.post('vendre.php', {id:id})
-            .done(function(data) {
-                location.reload()
-            })
-            .fail(function() {
-                alert("Error occurred.");
-            });
-        closeModal();
-    }
-
-    function useItem(id) {
-        $.post('useItem.php', {id:id})
+    function onConfirm(id, fichier) {
+        $.post(fichier, {id:id})
             .done(function(data) {
                 location.reload()
             })
