@@ -4,7 +4,7 @@ require_once 'config.php';
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $tri = isset($_GET['tri']) ? $_GET['tri'] : '';
 
-if (!in_array($tri, ['P']))
+if (!in_array($tri, ['A', 'D']))
     $tri = '';
 
 $stmt = $connexion->prepare("CALL GetMarketItems(12, ?, '$tri')");
@@ -199,8 +199,8 @@ $items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             <label for="tri">Trier par : </label>
             <select name="tri" id="tri" onchange="this.form.submit()">
                 <option value="" <?= $tri == '' ? 'selected' : '' ?>>Nom (A-Z)</option>
-                <option value="P" <?= $tri == 'P' ? 'selected' : '' ?>>Prix croissant</option>
-                <option value="P" <?= $tri == 'P' ? 'selected' : '' ?>>Prix décroissant</option>
+                <option value="A" <?= $tri == 'P' ? 'selected' : '' ?>>Prix croissant</option>
+                <option value="D" <?= $tri == 'P' ? 'selected' : '' ?>>Prix décroissant</option>
             </select>
         </form>
     </div>

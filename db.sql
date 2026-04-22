@@ -204,7 +204,8 @@ BEGIN
       'GROUP BY i.IdItem, i.Nom, i.Type, i.Prix, i.Description, i.image ',
       'ORDER BY ',
       CASE sort
-        WHEN 'P' THEN 'i.Prix '
+        WHEN 'A' THEN 'i.Prix '
+        WHEN 'D' THEN 'i.Prix DESC '
         ELSE 'i.Nom '
       END,
       'LIMIT ? '
