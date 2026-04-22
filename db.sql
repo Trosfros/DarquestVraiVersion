@@ -197,10 +197,11 @@ BEGIN
     SET fuzz = CONCAT('%', search, '%');
 
     SET @sql = CONCAT(
-      'SELECT i.IdItem, i.Nom, GetItemTypeName(i.Type) as NomType, SUM(m.Quantite) AS Quantite, i.Prix, i.Description, i.image ',
+      'SELECT i.IdItem, i.Nom, GetItemTypeName(i.Type) as NomType, SUM(m.Quantite) AS Quantite, i.Prix, i.Description, i.image, j.Alias AS Vendeur ',
       'FROM Items i ',
       'INNER JOIN Marche m ON m.IdItem = i.IdItem ',
-      'WHERE Nom LIKE ? OR Description LIKE ? OR GetItemTypeName(i.Type) LIKE ? ',
+      'INNER JOIN Joueurs j ON m.IdJoueur = j.IdJoueur ',
+      'WHERE i.Nom LIKE ? OR i.Description LIKE ? OR GetItemTypeName(i.Type) LIKE ? ',
       'GROUP BY i.IdItem, i.Nom, i.Type, i.Prix, i.Description, i.image ',
       'ORDER BY ',
       CASE sort
@@ -219,9 +220,10 @@ END
 
 CREATE PROCEDURE GetItemById(Id INT)
 BEGIN 
-    SELECT i.IdItem, i.Nom, SUM(m.Quantite) AS Quantite, i.Prix, i.Description, i.image, GetItemTypeName(i.Type) as Type
+    SELECT i.IdItem, i.Nom, SUM(m.Quantite) AS Quantite, i.Prix, i.Description, i.image, GetItemTypeName(i.Type) as Type, j.Alias AS Vendeur
     FROM Items i
     INNER JOIN Marche m ON m.IdItem = i.IdItem
+    INNER JOIN Joueurs j ON m.IdJoueur = j.IdJoueur
     WHERE i.IdItem = Id
     GROUP BY i.IdItem, i.Nom, i.Type, i.Prix, i.Description, i.image;
 END;
