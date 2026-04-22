@@ -285,7 +285,7 @@ SELECT Quantite, m.IdJoueur INTO itemQuantity, SellerId
 FROM Marche m 
 WHERE m.IdItem = Iditem 
 LIMIT 1;
-SELECT PieceBronze INTO PlayerMoney
+SELECT PieceOr INTO PlayerMoney
 FROM Joueurs
 WHERE IdJoueur = Joueurs.IdJoueur;
 IF MageCheck = 0 && Itemtype = "S" THEN 
