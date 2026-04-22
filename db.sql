@@ -243,12 +243,12 @@ END
 CREATE PROCEDURE EnigmaUserStats(IdJoueur INT)
 BEGIN
   SELECT
-  SUM(Difficulte = 1) AS FacileTotal,
-  SUM(Difficulte = 1 AND Reussi = 1) AS FacileSuccess,
-  SUM(Difficulte = 2) AS MoyenTotal,
-  SUM(Difficulte = 2 AND Reussi = 1) AS MoyenSuccess,
-  SUM(Difficulte = 3) AS DifficileTotal,
-  SUM(Difficulte = 3 AND Reussi = 1) AS DifficileSuccess,
+  IFNULL(SUM(Difficulte = 1), 0) AS FacileTotal,
+  IFNULL(SUM(Difficulte = 1 AND Reussi = 1), 0) AS FacileSuccess,
+  IFNULL(SUM(Difficulte = 2), 0) AS MoyenTotal,
+  IFNULL(SUM(Difficulte = 2 AND Reussi = 1), 0) AS MoyenSuccess,
+  IFNULL(SUM(Difficulte = 3), 0) AS DifficileTotal,
+  IFNULL(SUM(Difficulte = 3 AND Reussi = 1), 0) AS DifficileSuccess,
   EstMage,
   StreakMagie
   FROM EssaieEnigmes es
@@ -338,7 +338,7 @@ IdItem INT,
 Quantite INT
 )
 BEGIN
- DECLARE InventoryQt INT;
+  DECLARE InventoryQt INT;
   Declare MarketItemCount INT;
   
  SELECT Quantite INTO InventoryQt
