@@ -56,7 +56,7 @@ CREATE TABLE Potions (
   Effet VARCHAR(45) NOT NULL,
   Duree INT NOT NULL,
   Soins INT NOT NULL DEFAULT 0,
-  CHECK (Soins < 5),
+  CHECK (Soins <= 5),
   PRIMARY KEY (IdItem),
   CONSTRAINT Fk_IdItem
     FOREIGN KEY (IdItem)
@@ -278,11 +278,7 @@ Declare Itemtype VARCHAR(20);
 SELECT Prix, Type INTO ItemPrice, Itemtype
  FROM Items
  WHERE Iditem = Items.IdItem;
-Select count(*) into MageCheck 
-from EssaieEnigmes EE
-inner join Enigme E on E.IdEnigme = EE.IdEnigme
-inner join CategorieEnigme CE on CE.IdCategorie = E.IdCategorie
-where CE.EstMagie = 1;
+SELECT EstMage INTO MageCheck FROM Joueurs j WHERE j.IdJoueur = IdJoueur;
 SELECT Quantite, m.IdJoueur INTO itemQuantity, SellerId
 FROM Marche m 
 WHERE m.IdItem = Iditem 
@@ -290,7 +286,7 @@ LIMIT 1;
 SELECT PieceBronze INTO PlayerMoney
 FROM Joueurs
 WHERE IdJoueur = Joueurs.IdJoueur;
-IF MageCheck >= 5 && Itemtype = "S" THEN 
+IF MageCheck = 0 && Itemtype = "S" THEN 
    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "cannot buy spells if you aren't a wizard";
 END IF; 
  IF Itemprice IS NOT NULL AND itemQuantity>=quantite THEN 
@@ -368,6 +364,42 @@ BEGIN
 END;
 //
 
+CREATE PROCEDURE CreateSort(Nom VARCHAR(45), Prix INT, Description VARCHAR(300), image VARCHAR(300), Instantane TINYINT(1), Degats INT, Soins INT)
+BEGIN
+  INSERT INTO Items (Nom, Type, Prix, Description, image) VALUES
+    (Nom, 'S', Prix, Description, image);
+  INSERT INTO Sorts (IdItem, Instantane, PointDeDegat, Soins) VALUES
+    (LAST_INSERT_ID(), Instantane, Degats, Soins);
+END;
+//
+
+CREATE PROCEDURE CreateArme(Nom VARCHAR(45), Prix INT, Description VARCHAR(300), image VARCHAR(300), Efficacite INT, Genre VARCHAR(45))
+BEGIN
+  INSERT INTO Items (Nom, Type, Prix, Description, image) VALUES
+    (Nom, 'A', Prix, Description, image);
+  INSERT INTO Armes (IdItem, Efficacite, Genre) VALUES
+    (LAST_INSERT_ID(), Efficacite, Genre);
+END;
+//
+
+CREATE PROCEDURE CreateArmure(Nom VARCHAR(45), Prix INT, Description VARCHAR(300), image VARCHAR(300), Taille VARCHAR(45), Matiere VARCHAR(45))
+BEGIN
+  INSERT INTO Items (Nom, Type, Prix, Description, image) VALUES
+    (Nom, 'R', Prix, Description, image);
+  INSERT INTO Armures (IdItem, Taille, Matiere) VALUES
+    (LAST_INSERT_ID(), Taille, Matiere);
+END;
+//
+
+CREATE PROCEDURE CreatePotion(Nom VARCHAR(45), Prix INT, Description VARCHAR(300), image VARCHAR(300), Effet VARCHAR(45), Duree INT, Soins INT)
+BEGIN
+  INSERT INTO Items (Nom, Type, Prix, Description, image) VALUES
+    (Nom, 'P', Prix, Description, image);
+  INSERT INTO Potions (IdItem, Effet, Duree, Soins) VALUES
+    (LAST_INSERT_ID(), Effet, Duree, Soins);
+END;
+//
+
 delimiter ;
 
 INSERT INTO CategorieEnigme (Categorie, EstMagie) VALUES
@@ -379,12 +411,12 @@ INSERT INTO Enigme (IdCategorie, Difficulte, Question, Reponse1, Reponse2, Repon
   (1, 2, 'Moyen', 'Lyon', 'Paris', 'Marseille', 'Bordeaux', 2),
   (2, 3, 'Enigme magie', '1', '2', '3', '4', 2);
 
-INSERT INTO Items (Nom, Type, Prix, Description, image) VALUES
-  ('Épée Magique', 'A', 300, 'Une épee magique', 'epee.png'),
-  ('Armure En Fer', 'R', 150, 'Une grosse armure capable de vous protéger contre les attaques!', 'amure1.png'),
-  ('Potion Magique de Soin', 'P', 34, 'Une potion de soin très utiles en combat!', 'soin1.png'),
-  ('Potion Magique De Glace', 'P', 26, 'Gèle les ennemies de toute tailles!', 'potion2.png'),
-  ('Potion Magique De Feu', 'P', 39, 'Attention sa brule!', 'potion3.png');
+CALL CreateArme('Épée Magique', 300, 'Une épee magique', 'epee.png', 1, 'Deux mains');
+CALL CreateArmure('Armure En Fer', 150, 'Une grosse armure capable de vous protéger contre les attaques!', 'amure1.png', 'Grande', 'Fer');
+CALL CreatePotion('Potion Magique de Soin', 34, 'Une potion de soin très utiles en combat!', 'soin1.png', 'Soin', 1, 5);
+CALL CreatePotion('Potion Magique De Glace', 26, 'Gèle les ennemies de toute tailles!', 'potion2.png', 'Glace', 1, 0);
+CALL CreatePotion('Potion Magique De Feu', 39, 'Attention sa brule!', 'potion3.png', 'Feu', 1, 0);
+CALL CreateSort('Sort de Soins', 100, 'aaaaaaaaaaaaaahhhhh', 'heal.webp', 1, 0, 5);
 
 INSERT INTO Joueurs (Alias, Nom, Prenom, MDP, EstAdmin) VALUES
   ('Trosfros', 'Guichard', 'Maxime', 0x243279243130246a6a667838374f3069666748465251715932685a4f65724f55754b6c6f43644c4f506f38645079317576506a34714b633277304943, 1),
@@ -399,7 +431,8 @@ INSERT INTO Marche (IdJoueur, IdItem, Quantite) VALUES
   (2, 2, 5),
   (3, 3, 10),
   (4, 4, 13),
-  (5, 5, 3);
+  (5, 5, 3),
+  (1, 6, 3);
 
 CALL BuyItem(3,4,3);
 SELECT * from Joueurs;
