@@ -292,17 +292,13 @@ IF MageCheck = 0 && Itemtype = "S" THEN
    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "cannot buy spells if you aren't a wizard";
 END IF; 
  IF Itemprice IS NOT NULL AND itemQuantity>=quantite THEN 
-    IF Itemtype = "S" THEN
-     Set TotalPrice = (ItemPrice* 1.1)* quantite;
-    ELSE 
-      Set TotalPrice = (ItemPrice* 0.6)* quantite;
-    END IF;
-    IF PlayerMoney >= ItemPrice THEN 
+    SET TotalPrice = ItemPrice * Quantite;
+    IF PlayerMoney >= TotalPrice THEN 
       
-     UPDATE Joueurs SET  Joueurs.PieceOr  = Joueurs.PieceOr - ItemPrice * Quantite
+     UPDATE Joueurs SET  Joueurs.PieceOr  = Joueurs.PieceOr - TotalPrice
      WHERE IdJoueur = Joueurs.IdJoueur;
      UPDATE Joueurs 
-     SET Joueurs.PieceOr = Joueurs.PieceOr + TotalPrice
+     SET Joueurs.PieceOr = Joueurs.PieceOr + TotalPrice * IF(ItemType = 'S', 1.1, 0.6)
      WHERE Joueurs.IdJoueur = SellerId;
 
       UPDATE Marche SET Marche.Quantite = Marche.Quantite - quantite
