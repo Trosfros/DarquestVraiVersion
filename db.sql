@@ -350,7 +350,7 @@ BEGIN
     SET inv.Quantite = inv.Quantite- Quantite
     WHERE inv.IdJoueur = IdJoueur AND inv.IdItem = IdItem;
     SELECT COUNT(*) INTO MarketItemCount
-    FROM Marche WHERE IdItem = IdItem AND IdJoueur = IdJoueur;
+    FROM Marche WHERE Marche.IdItem = IdItem AND Marche.IdJoueur = IdJoueur;
     DELETE FROM Inventaires WHERE Inventaires.Quantite = 0;
     if MarketItemCount = 0 THEN
       INSERT INTO Marche (IdJoueur,IdItem,Quantite)
