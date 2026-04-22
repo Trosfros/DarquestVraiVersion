@@ -3,13 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>AVERSE - Connexion</title>
-    <link rel="stylesheet" href="CSS/style.css">
-    <style>
-        .login-box { max-width: 400px; margin: 100px auto; padding: 20px; background: #111; border: 1px solid #d4af37; border-radius: 8px; color: white; text-align: center; }
-        input { width: 90%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
-        .btn-login { background: #d4af37; color: black; font-weight: bold; border: none; padding: 10px 20px; cursor: pointer; border-radius: 20px; width: 100%; }
-    </style>
-</head>
+    <link rel="stylesheet" href="CSS/style.css"> 
+    <link rel="stylesheet" href="styles/login.css">
 <body>
     
     <?php include_once 'template/header.php' ?>
