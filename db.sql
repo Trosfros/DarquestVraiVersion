@@ -16,6 +16,8 @@ CREATE TABLE Joueurs (
   NbDemandeArgent INT NOT NULL DEFAULT 0,
   PV INT NOT NULL DEFAULT 100,
   StreakMagie INT NOT NULL DEFAULT 0,
+  MagieReussies int(11) DEFAULT 0,
+
   PRIMARY KEY (IdJoueur)
 );
 
@@ -27,6 +29,7 @@ CREATE TABLE Items (
   Prix INT NOT NULL,
   Description VARCHAR(300) NOT NULL,
   image VARCHAR(300),
+  Rarete int(11) DEFAULT 1,
   CHECK (Type in ('A', 'R', 'P', 'S')),
   PRIMARY KEY (IdItem)
 );
