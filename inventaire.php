@@ -6,24 +6,20 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
-$idJoueur = $_SESSION['user']['IdJoueur']; 
-$items_possedes = [];
-
-$sql = "SELECT i.IdItem ,i.Quantite, it.Nom, it.image
+$idJoueur = $_SESSION['user']['IdJoueur']; // known safe
+$result = $connexion->query(
+    "SELECT i.IdItem ,i.Quantite, it.Nom, it.image
         FROM Inventaires i 
         JOIN Items it ON i.IdItem = it.IdItem
-        WHERE i.IdJoueur = ?";
+        WHERE i.IdJoueur = $idJoueur");
+$items_possedes = $result->fetch_all(MYSQLI_ASSOC);
 
-$stmt = $connexion->prepare($sql);
-$stmt->bind_param("i", $idJoueur);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $items_possedes[] = $row;
-    }
-}
+$result = $connexion->query(
+    "SELECT i.IdItem ,i.Quantite, it.Nom, it.image
+        FROM Marche i 
+        JOIN Items it ON i.IdItem = it.IdItem
+        WHERE i.IdJoueur = $idJoueur");
+$items_vente = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -55,6 +51,25 @@ if ($result->num_rows > 0) {
                     
                     <button class="btn btn-sell" onclick="openModal(this, '<?= $item['Nom'] ?>', <?= $item['IdItem']?>, 'vendre.php')">Vendre</button>
                     <button class="btn btn-use" onclick="openModal(this, '<?= $item['Nom'] ?>', <?= $item['IdItem']?>, 'useItem.php')">Utiliser</button>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
+    <h1 class="inventory-title">Mes Items en vente</h1>
+
+    <?php if (empty($items_vente)): ?>
+        <?php else: ?>
+        <div class="inventory-grid">
+            <?php foreach ($items_vente as $item): ?>
+                <div class="inventory-item">
+                    <div class="item-img" style="height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                        <img src="img/<?= htmlspecialchars($item['image'] ?: 'default.png') ?>" alt="" style="max-height: 100%;">
+                    </div>
+                    <h3 style="margin: 5px 0;"><?= htmlspecialchars($item['Nom']) ?></h3>
+                    <p style="color: #d4af37; font-weight: bold;">Quantité : <?= $item['Quantite'] ?></p>
+                    
+                    <button class="btn btn-sell" onclick="openModal(this, '<?= $item['Nom'] ?>', <?= $item['IdItem']?>, 'retirer_vente.php')">Retirer</button>
                 </div>
             <?php endforeach; ?>
         </div>

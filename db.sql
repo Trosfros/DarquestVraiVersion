@@ -264,6 +264,15 @@ BEGIN
   WHERE es.IdJoueur = IdJoueur;
 END
 //
+
+CREATE PROCEDURE AddItemToInventory(Joueur INT, Item INT, Qty INT)
+BEGIN
+  INSERT INTO Inventaires (IdJoueur, IdItem, Quantite)
+    VALUES (Joueur, Item, Qty)
+    ON DUPLICATE KEY UPDATE Quantite = Quantite + Qty;
+END;
+//
+
 Create PROCEDURE ConvertCoinsToGold(
   IdJoueur INT
 )
@@ -288,6 +297,7 @@ PieceOr = PlayerGold + ConvertedBronze + ConvertedSilver
 WHERE J.IdJoueur = IdJoueur;
 END
 //
+
 CREATE PROCEDURE BuyItem(
   IdJoueur INT,
   Iditem INT,
@@ -387,6 +397,21 @@ BEGIN
       WHERE m.IdItem = IdItem AND IdJoueur = m.IdJoueur;
     END IF;
     
+  ELSE
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Not enough items in inventory';
+  END IF;
+END;
+//
+
+CREATE PROCEDURE RemoveItemFromMarket(Joueur INT, Item INT, Qty INT)
+BEGIN
+  DECLARE available INT;
+  SELECT Quantite INTO available FROM Marche WHERE IdJoueur = Joueur AND IdItem = Item;
+
+  IF available >= Qty THEN
+    UPDATE Marche m SET m.Quantite = m.Quantite - Qty WHERE IdJoueur = Joueur AND IdItem = Item;
+    DELETE FROM Marche WHERE Quantite = 0;
+    CALL AddItemToInventory(Joueur, Item, Qty);
   ELSE
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Not enough items in inventory';
   END IF;
